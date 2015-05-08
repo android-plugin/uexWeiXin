@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<resources>
+   
+    <!-- uexWeChat 微信分享 -->
+    <string name="err_auth_denied">认证被否决</string>
+    <string name="err_comm">发送错误</string>
+    <string name="err_ok">发送成功</string>
+    <string name="err_sent_failed">发送错误</string>
+    <string name="err_support">不支持错误</string>
+    <string name="err_user_cancel">取消发送</string>
+
+</resources>

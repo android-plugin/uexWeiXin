@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+     <!-- н╒пе -->
+  <style name="plugin_uexweixin_Transparent">  
+    <item name="android:windowBackground">@color/plugin_uexweixin_transparent_background</item>  
+    <item name="android:windowNoTitle">true</item>  
+    <item name="android:windowIsTranslucent">true</item>    
+    <item name="android:windowAnimationStyle">@+android:style/Animation.Translucent</item>  
+  </style>     
+</resources>

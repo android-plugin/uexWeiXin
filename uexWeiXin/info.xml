@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<uexplugins>
+    <plugin uexName="uexWeiXin" version="3.1.27" build = "27">
+        <info>27:修复分享回调时应用奔溃退出的问题</info>
+        <build>26:修改回调方法</build>
+        <build>25:新添加微信登陆功能</build>
+        <build>24:修改分享文本、分享图片、分享链接回调接口参数</build>
+        <build>23:结合后台修复插件需要定制出包的问题</build>
+        <build>22:修复在Popover中微信分享失败问题</build>
+        <build>21:新增分享文本、分享图片、分享链接接口</build>
+        <build>20:插件包增加src目录文件，用于解决回调的定制问题</build>
+        <build>19:修复分享图片不支持wgt路径协议的问题</build>
+        <build>18:修复分享完成回调时奔溃的问题</build>
+        <build>17:修复分享完成回调时网页未恢复的问题</build>
+        <build>16:修改AndroidManifest文件中微信相关activity注册信息</build>
+        <build>15:更新插件中引擎jar包</build>
+        <build>14:修复支付完成回调时网页未恢复的问题</build>
+        <build>13:新增接口generatePrepayID和sendPay</build>
+        <build>12:修复微信支付完成后没有回调的问题</build>
+        <build>11:修改cbIsWXAppInstalled回调方法参数，已安装返回0，未安装返回1 </build>
+        <build>10:修改mainfest添加微信activity </build>
+        <build>9:添加cbSendTextContent和cbSendImageContent回调 </build>
+        <build>8:添加注册回调cbRegisterApp</build>
+        <build>7:添加架包</build>
+        <build>6:处理分享图片问题</build>
+        <build>5:修复扶贫基金会中的回调兼容问题</build>
+        <build>4:处理微信返回值问题</build>
+        <build>3:修复微信不能生成订单问题</build>
+        <build>2:修复配置问题</build>
+        <build>1:修复微信资源问题</build>
+        <build>0:微信分享功能插件</build>
+    </plugin>
+</uexplugins>
