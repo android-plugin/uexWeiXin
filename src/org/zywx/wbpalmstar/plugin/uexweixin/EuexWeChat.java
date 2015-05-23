@@ -1108,7 +1108,8 @@ public class EuexWeChat extends EUExBase {
 		}
 		Bitmap thumbBmp = Bitmap.createScaledBitmap(bmp, THUMB_SIZE,
 				THUMB_SIZE, true);
-		if (bmp != null) {
+			
+		if (bmp != null && bmp != thumbBmp) {
 			bmp.recycle();
 		}
 		return thumbBmp;
