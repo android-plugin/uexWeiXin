@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexWeiXin" version="3.1.28" build = "28">
-        <info>28:修正链接分享时图片本来已经比较小不需要缩略导致的问题</info>
+    <plugin uexName="uexWeiXin" version="3.1.29" build = "29">
+        <info>29:微信支付sdk升级</info>
+        <build>28:修正链接分享时图片本来已经比较小不需要缩略导致的问题</build>
         <build>27:修复分享回调时应用奔溃退出的问题</build>
         <build>26:修改回调方法</build>
         <build>25:新添加微信登陆功能</build>

@@ -169,6 +169,9 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
     function getWeiXinLoginCheckAccessToken(){
         uexWeiXin.getWeiXinLoginCheckAccessToken(access_token,openid);
     }
+    function openNewWin(){
+        uexWindow.open('pay', '0', "index.html", '2', '', '', 4);
+    }
 </script>
 </head>
 
@@ -199,7 +202,7 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
             <span>5.当前手机安装的微信版本是否支持微信支付</span>
             <span>返回0支持，1版本太低不支持</span>
             <input class="btn" type="button" value="判断是否支持微信支付" onclick="uexWeiXin.isSupportPay()">
-            <span>一.获取微信支付access_token</span>
+            <!--<span>一.获取微信支付access_token</span>
             <span>准备工作:在使用接口之前请先保证持有向微信开放平台申请得到的 appid、appsecret(长度为
                32 的字符串,用于获取 access_token)、appkey(长度为 128 的字符串,用于支付过程中生 成 app_signature)及 partnerkey(微信公众平台商户模块生成的商户密钥)。网页会在cbGetAccessTocken（）中获得。</span>
             <input class="btn" type="button" value="获取access_token" onclick="getAccessToken()">
@@ -211,7 +214,8 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
             <input class="btn" type="button" value="生成预支付订单" onclick="generateAdvanceOrder()">
             <span>三.调起微信支付</span>
             <span>将第二步生成的 prepayId 作为参数,调用微信 sdk 发送支付请求到微信。</span>
-            <input class="btn" type="button" value="调微信支付" onclick="gotoPay()">
+            <input class="btn" type="button" value="调微信支付" onclick="gotoPay()">-->
+            <input class="btn" type="button" value="进入支付" onclick="openNewWin()">
         </div>
     </div>
 </body>

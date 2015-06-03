@@ -34,9 +34,16 @@
     <string name="browser_dialog_error">错误提示</string>
     <string name="browser_init_error">程序不完整</string>
 
-    <string name="appkey">82ae9d4e-557e-4491-b2b9-822b6b7b8d4d</string>
+    <string name="appkey">26cf1a0e-6d52-41aa-bb54-f4efe8a35d33</string>
+    <string name="appstatus">4A0D7476B2A39662BE3B27</string>
     <string name="push">true</string>
-    <string name="appstatus">6D4F716AB6384036B4F0AC</string>
+    <string name="certificate_psw"></string>
+    <string name="widget_startup_report_host">http://newdc.appcan.cn/</string>
+    <string name="push_host">newpush.appcan.cn:1883</string>
+    <string name="bindUser_host">http://newpush.appcan.cn/</string>
+    <string name="analytics_host">http://newdc.appcan.cn/</string>
+    <string name="mam_host">http://newdc.appcan.cn/</string>
+    <string name="mam_push_host_and_port">newpush.appcan.cn:1883</string>
 
     <!-- platform myspace  use -->
     <string name="platform_myspace_app_center">应用中心</string>
@@ -56,5 +63,4 @@
     <string name="err_user_cancel">取消发送</string>
     <string name="app_tip">提示</string>
     <string name="pay_result_callback_msg" formatted="false">微信支付结果：%s</string>
-
 </resources>
