@@ -1,23 +1,5 @@
 package org.zywx.wbpalmstar.plugin.uexweixin;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONStringer;
-import org.zywx.wbpalmstar.base.BUtility;
-import org.zywx.wbpalmstar.engine.EBrowserView;
-import org.zywx.wbpalmstar.engine.universalex.EUExBase;
-import org.zywx.wbpalmstar.engine.universalex.EUExCallback;
-
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -25,6 +7,8 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -40,6 +24,29 @@ import com.tencent.mm.sdk.modelmsg.WXWebpageObject;
 import com.tencent.mm.sdk.modelpay.PayReq;
 import com.tencent.mm.sdk.openapi.IWXAPI;
 import com.tencent.mm.sdk.openapi.WXAPIFactory;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONStringer;
+import org.zywx.wbpalmstar.base.BUtility;
+import org.zywx.wbpalmstar.engine.DataHelper;
+import org.zywx.wbpalmstar.engine.EBrowserView;
+import org.zywx.wbpalmstar.engine.universalex.EUExBase;
+import org.zywx.wbpalmstar.engine.universalex.EUExCallback;
+import org.zywx.wbpalmstar.plugin.uexweixin.VO.PayDataVO;
+import org.zywx.wbpalmstar.plugin.uexweixin.VO.PrePayDataVO;
+import org.zywx.wbpalmstar.plugin.uexweixin.utils.JsConst;
+import org.zywx.wbpalmstar.plugin.uexweixin.utils.WXPayGetPrepayIdTask;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
 
 @SuppressLint("SdCardPath")
 public class EuexWeChat extends EUExBase {
@@ -94,6 +101,10 @@ public class EuexWeChat extends EUExBase {
 
 	private static String accessCode;
 
+    private static final String BUNDLE_DATA = "data";
+    private static final int MSG_GET_PREPAY_ID = 1;
+    private static final int MSG_START_PAY = 2;
+
 	public EuexWeChat(Context context, EBrowserView parent) {
 		super(context, parent);
 		init();
@@ -122,6 +133,7 @@ public class EuexWeChat extends EUExBase {
 			public void callBackPayResult(BaseResp msg) {
 				jsCallbackAsyn(CB_GET_PAY_RESULT, 0, EUExCallback.F_C_JSON,
                         getJson(msg.errCode + "", msg.errStr));
+                callBackPluginJs(JsConst.CALLBACK_START_PAY, getJson(msg.errCode + "", msg.errStr));
 			}
 
 			@Override
@@ -1114,4 +1126,90 @@ public class EuexWeChat extends EUExBase {
 		}
 		return thumbBmp;
 	}
+
+    public void getPrepayId(String[] params) {
+        if (params == null || params.length < 1) {
+            errorCallback(0, 0, "error params!");
+            return;
+        }
+        Message msg = new Message();
+        msg.obj = this;
+        msg.what = MSG_GET_PREPAY_ID;
+        Bundle bd = new Bundle();
+        bd.putStringArray(BUNDLE_DATA, params);
+        msg.setData(bd);
+        mHandler.sendMessage(msg);
+    }
+
+    private void getPrepayIdMsg(String[] params) {
+        String json = params[0];
+        PrePayDataVO dataVO = DataHelper.gson.fromJson(json, PrePayDataVO.class);
+        WXPayGetPrepayIdTask task = new WXPayGetPrepayIdTask(mContext, dataVO, listener);
+        task.getPrepayId();
+    }
+
+    public void startPay(String[] params) {
+        if (params == null || params.length < 1) {
+            errorCallback(0, 0, "error params!");
+            return;
+        }
+        Message msg = new Message();
+        msg.obj = this;
+        msg.what = MSG_START_PAY;
+        Bundle bd = new Bundle();
+        bd.putStringArray(BUNDLE_DATA, params);
+        msg.setData(bd);
+        mHandler.sendMessage(msg);
+    }
+
+    private void startPayMsg(String[] params) {
+        String json = params[0];
+        PayDataVO dataVO = DataHelper.gson.fromJson(json, PayDataVO.class);
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+            dataVO.setPackageValue(jsonObject.getString(JsConst.PACKAGE_VALUE));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        WXPayGetPrepayIdTask task = new WXPayGetPrepayIdTask(mContext, dataVO);
+        task.pay();
+    }
+
+    @Override
+    public void onHandleMessage(Message message) {
+        if(message == null){
+            return;
+        }
+        Bundle bundle=message.getData();
+        switch (message.what) {
+
+            case MSG_GET_PREPAY_ID:
+                getPrepayIdMsg(bundle.getStringArray(BUNDLE_DATA));
+                break;
+            case MSG_START_PAY:
+                startPayMsg(bundle.getStringArray(BUNDLE_DATA));
+                break;
+            default:
+                super.onHandleMessage(message);
+        }
+    }
+
+    private void callBackPluginJs(String methodName, String jsonData){
+        String js = SCRIPT_HEADER + "if(" + methodName + "){"
+                + methodName + "('" + jsonData + "');}";
+        onCallback(js);
+    }
+
+    OnPayResultListener listener = new OnPayResultListener() {
+        @Override
+        public void onGetPrepayResult(String json) {
+            callBackPluginJs(JsConst.CALLBACK_GET_PREPAY_ID, json);
+        }
+    };
+
+    public interface OnPayResultListener{
+        public void onGetPrepayResult(String jsonData);
+    }
+
+
 }
