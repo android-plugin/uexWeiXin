@@ -219,7 +219,7 @@ public class WXPayGetPrepayIdTask {
             packageParams.add(new BasicNameValuePair("sign", sign));
             String getXml = toXml(packageParams);
 
-            return new String(getXml.getBytes("UTF-8"), "ISO-8859-1");
+            return new String(getXml.toString().getBytes(), "ISO-8859-1");
 
         } catch (Exception e) {
             Log.e(TAG, "genProductArgs fail, ex = " + e.getMessage());
