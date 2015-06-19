@@ -133,7 +133,8 @@ public class EuexWeChat extends EUExBase {
 			public void callBackPayResult(BaseResp msg) {
 				jsCallbackAsyn(CB_GET_PAY_RESULT, 0, EUExCallback.F_C_JSON,
                         getJson(msg.errCode + "", msg.errStr));
-                callBackPluginJs(JsConst.CALLBACK_START_PAY, getJson(msg.errCode + "", msg.errStr));
+                callBackPluginJsAsync(JsConst.CALLBACK_START_PAY,
+                        getJson(msg.errCode + "", msg.errStr));
 			}
 
 			@Override
@@ -1197,7 +1198,15 @@ public class EuexWeChat extends EUExBase {
     private void callBackPluginJs(String methodName, String jsonData){
         String js = SCRIPT_HEADER + "if(" + methodName + "){"
                 + methodName + "('" + jsonData + "');}";
+        Log.i(TAG, "callBackPluginJs:" + js);
         onCallback(js);
+    }
+
+    private void callBackPluginJsAsync(String methodName, String jsonData){
+        String js = SCRIPT_HEADER + "if(" + methodName + "){"
+                + methodName + "('" + jsonData + "');}";
+        Log.i(TAG, "callBackPluginJsAsync:" + js);
+        mBrwView.addUriTaskAsyn(js);
     }
 
     OnPayResultListener listener = new OnPayResultListener() {
