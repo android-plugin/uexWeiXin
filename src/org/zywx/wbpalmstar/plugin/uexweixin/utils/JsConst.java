@@ -34,4 +34,15 @@ public class JsConst {
 
     public static final String PRODUCT_ID = "product_id";
     public static final String OPENID = "openid";
+
+    public static final String CALLBACK_LOGIN = "uexWeiXin.cbLogin";
+    public static final String CALLBACK_GET_LOGIN_ACCESS_TOKEN = "uexWeiXin.cbGetLoginAccessToken";
+    public static final String CALLBACK_GET_LOGIN_REFRESH_ACCESS_TOKEN = "uexWeiXin.cbGetLoginRefreshAccessToken";
+    public static final String CALLBACK_GET_LOGIN_CHECK_ACCESS_TOKEN = "uexWeiXin.cbGetLoginCheckAccessToken";
+    public static final String CALLBACK_GET_LOGIN_UNION_I_D = "uexWeiXin.cbGetLoginUnionID";
+
+    public static final String URL_LOGIN_GET_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=%s";
+    public static final String URL_LOGIN_REFRESH_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=%s&grant_type=%s&refresh_token=%s";
+    public static final String URL_LOGIN_CHECK_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/auth?access_token=%s&openid=%s";
+    public static final String URL_LOGIN_UNIONID = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s";
 }
