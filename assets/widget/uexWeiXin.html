@@ -11,8 +11,8 @@ content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, us
 var cText = 0;
 var cJson = 1;
 var cInt = 2;
-var appId = "wxd930ea5d5a258f4f";
-var app_serect = "db426a9829e4b49a0dcac7b4162da6b6";
+var appId = "wx0d75288570c90d62";
+var app_serect = "223ce5ca5e9bb8d90cf57a051c0595ed";
 var app_key = "L8LrMqqeGRxST5reouB0K66CaYAWpqhAVsq7ggKkxHCOastWksvuX1uvmvQclxaHoYd3ElNBrNO2DHnnzgfVG9Qs473M3DTOZug5er46FhuGofumV8H2FVR9qkjSlC5K";
 var partnerId = "1900000109";
 var traceId = "crestxu_test";
@@ -105,6 +105,60 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
             uexWeiXin.cbGetWXAppInstallUrl=function(opCode,dataType,data){
                 alert("cbGetWXAppInstallUrl："+data);
             };
+            uexWeiXin.cbLogin = cbLogin;
+            uexWeiXin.cbGetLoginAccessToken = cbGetLoginAccessToken;
+            uexWeiXin.cbGetLoginRefreshAccessToken = cbGetLoginRefreshAccessToken;
+            uexWeiXin.cbGetLoginCheckAccessToken = cbGetLoginCheckAccessToken;
+            uexWeiXin.cbGetLoginUnionID = cbGetLoginUnionID;
+    }
+    var code = "";
+    var refreshToken = "";
+    var openid = "";
+    var accessToken = "";
+    function loginMsg(){
+        var params = {
+            scope:"snsapi_userinfo,snsapi_base",
+            state:"0902"
+        };
+        var data = JSON.stringify(params);
+        uexWeiXin.login(data);
+    }
+
+    function getLoginAccessToken(){
+        var params = {
+            secret:app_serect,
+            code:code,
+            grant_type:"authorization_code"
+        };
+        var data = JSON.stringify(params);
+        uexWeiXin.getLoginAccessToken(data);
+    }
+
+    function getLoginRefreshAccessToken(){
+        var params = {
+            grant_type:"refresh_token",
+            refresh_token:refreshToken
+        };
+        var data = JSON.stringify(params);
+        uexWeiXin.getLoginRefreshAccessToken(data);
+    }
+
+    function getLoginCheckAccessToken(){
+        var params = {
+            access_token:accessToken,
+            openid:openid
+        };
+        var data = JSON.stringify(params);
+        uexWeiXin.getLoginCheckAccessToken(data);
+    }
+
+    function getLoginUnionID(){
+        var params = {
+            access_token:accessToken,
+            openid:openid
+        };
+        var data = JSON.stringify(params);
+        uexWeiXin.getLoginUnionID(data);
     }
 
    //分享文本，支持分享到朋友圈与用户好友
@@ -172,6 +226,36 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
     function openNewWin(){
         uexWindow.open('pay', '0', "index.html", '2', '', '', 4);
     }
+
+    function cbLogin(info){
+        alert(info);
+        var data = JSON.parse(info);
+        code = data.code;
+    }
+
+    function cbGetLoginAccessToken(info){
+        alert(info);
+        var data = JSON.parse(info);
+        accessToken = data.access_token;
+        openid = data.openid;
+        refreshToken = data.refresh_token;
+    }
+
+    function cbGetLoginRefreshAccessToken(info){
+        alert(info);
+        var data = JSON.parse(info);
+        accessToken = data.access_token;
+        openid = data.openid;
+        refreshToken = data.refresh_token;
+    }
+
+    function cbGetLoginCheckAccessToken(info){
+        alert(info);
+    }
+
+    function cbGetLoginUnionID(info){
+        alert(info);
+    }
 </script>
 </head>
 
@@ -187,9 +271,6 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
             <span>4.微信分享</span>
             <span>选择分享到对话，或者朋友圈, 0：对话  1：朋友圈</span>
             <input type="text" value="0" id="type">
-            <input class="btn" type="button" value="分享文本" onclick="shareText();">
-            <input class="btn" type="button" value="分享图片" onclick="sharePic();">
-            <span>新增的分享接口</span>
             <input class="btn" type="button" value="分享文本" onclick="shareTextContent();">
             <input class="btn" type="button" value="分享图片" onclick="shareImageContent();">
             <input class="btn" type="button" value="分享链接" onclick="shareLinkContent();">
@@ -199,6 +280,17 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
             <input class="btn" type="button" value="获取个人信息" onClick="getWeiXinLoginUnionID()">
             <input class="btn" type="button" value="获取刷新token" onClick="getWeiXinLoginRefreshAccessToken()">
             <input class="btn" type="button" value="检验accessToken" onClick="getWeiXinLoginCheckAccessToken()">
+            <br><br><br>
+            <input class='btn' type='button' value='login' onclick='loginMsg()'>
+
+            <input class='btn' type='button' value='getLoginAccessToken' onclick='getLoginAccessToken()'>
+
+            <input class='btn' type='button' value='getLoginRefreshAccessToken' onclick='getLoginRefreshAccessToken()'>
+
+            <input class='btn' type='button' value='getLoginCheckAccessToken' onclick='getLoginCheckAccessToken()'>
+
+            <input class='btn' type='button' value='getLoginUnionID' onclick='getLoginUnionID()'>
+
             <span>5.当前手机安装的微信版本是否支持微信支付</span>
             <span>返回0支持，1版本太低不支持</span>
             <input class="btn" type="button" value="判断是否支持微信支付" onclick="uexWeiXin.isSupportPay()">
@@ -216,6 +308,7 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
             <span>将第二步生成的 prepayId 作为参数,调用微信 sdk 发送支付请求到微信。</span>
             <input class="btn" type="button" value="调微信支付" onclick="gotoPay()">-->
             <input class="btn" type="button" value="进入支付" onclick="openNewWin()">
+
         </div>
     </div>
 </body>

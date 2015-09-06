@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexWeiXin" version="3.1.30" build = "30">
-        <info>30:修复微信支付返回时偶尔没有回调的问题。</info>
+    <plugin uexName="uexWeiXin" version="3.1.31" build = "31">
+        <info>31:更新微信登陆相关接口。</info>
+        <build>30:修复微信支付返回时偶尔没有回调的问题。</build>
         <build>29:微信支付sdk升级</build>
         <build>28:修正链接分享时图片本来已经比较小不需要缩略导致的问题</build>
         <build>27:修复分享回调时应用奔溃退出的问题</build>

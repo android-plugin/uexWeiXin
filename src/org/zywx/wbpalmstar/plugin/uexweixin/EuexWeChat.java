@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.TextureView;
 import android.widget.Toast;
 
 import com.tencent.mm.sdk.constants.Build;
@@ -35,6 +36,11 @@ import org.zywx.wbpalmstar.engine.DataHelper;
 import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
 import org.zywx.wbpalmstar.engine.universalex.EUExCallback;
+import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginAccessTokenVO;
+import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginCheckTokenVO;
+import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginRefreshTokenVO;
+import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginResultVO;
+import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.PayDataVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.PrePayDataVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.utils.JsConst;
@@ -44,6 +50,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -105,6 +112,13 @@ public class EuexWeChat extends EUExBase {
     private static final int MSG_GET_PREPAY_ID = 1;
     private static final int MSG_START_PAY = 2;
 
+    private static final int MSG_LOGIN = 6;
+    private static final int MSG_GET_LOGIN_ACCESS_TOKEN = 7;
+    private static final int MSG_GET_LOGIN_REFRESH_ACCESS_TOKEN = 8;
+    private static final int MSG_GET_LOGIN_CHECK_ACCESS_TOKEN = 9;
+    private static final int MSG_GET_LOGIN_UNION_I_D = 10;
+    private boolean isLoginNew = false;
+
 	public EuexWeChat(Context context, EBrowserView parent) {
 		super(context, parent);
 		init();
@@ -165,15 +179,32 @@ public class EuexWeChat extends EUExBase {
 					String code = ((SendAuth.Resp) msg).code;// 需要转换一下才可以
 					accessCode = code;
 				}
-				jsCallbackAsyn(CB_LOGIN_WEIXIN, 0, EUExCallback.F_C_TEXT,
-						msg.errCode + "");
+                if (isLoginNew) {
+                    LoginResultVO resultVO = new LoginResultVO();
+                    resultVO.setErrCode(msg.errCode + "");
+                    SendAuth.Resp resp = (SendAuth.Resp) msg;
+                    if (resp != null){
+                        if (msg.errCode == 0) {
+                            resultVO.setCode(resp.code);
+                        }
+                        resultVO.setState(resp.state);
+                        resultVO.setLanguage(resp.lang);
+                        resultVO.setCountry(resp.country);
+                        String resultStr = DataHelper.gson.toJson(resultVO);
+                        shareCallBack(JsConst.CALLBACK_LOGIN, resultStr);
+                    }
+                    isLoginNew = false;
+                }else{
+                    jsCallbackAsyn(CB_LOGIN_WEIXIN, 0, EUExCallback.F_C_TEXT,
+                            msg.errCode + "");
+                }
 			}
 		};
 	}
 
 	private void shareCallBack(String funName, String code) {
-		String js = SCRIPT_HEADER + "if(" + funName + "){" + funName + "("
-				+ code + SCRIPT_TAIL;
+		String js = SCRIPT_HEADER + "if(" + funName + "){" + funName + "('"
+				+ code + "')}";
 		mBrwView.addUriTaskAsyn(js);
 	}
 
@@ -232,7 +263,7 @@ public class EuexWeChat extends EUExBase {
 			Log.i("EuexWeChat", "grant_type=====>" + grant_type);
 
 			String url = String
-					.format("https://api.weixin.qq.com/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=%s",
+					.format(JsConst.URL_LOGIN_GET_ACCESS_TOKEN,
 							appId, secret, accessCode, grant_type);
 			Log.i("EuexWeChat", "url=====>" + url);
 			NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
@@ -256,7 +287,7 @@ public class EuexWeChat extends EUExBase {
 			String refresh_token = parms[1];
 
 			String url = String
-					.format("https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=%s&grant_type=%s&refresh_token=%s",
+					.format(JsConst.URL_LOGIN_REFRESH_ACCESS_TOKEN,
 							appId, grant_type, refresh_token);
 			Log.i("EuexWeChat", "url=====>" + url);
 			NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
@@ -279,7 +310,7 @@ public class EuexWeChat extends EUExBase {
 			String access_token = parms[0];
 			String openid = parms[1];
 			String url = String
-					.format("https://api.weixin.qq.com/sns/auth?access_token=%s&openid=%s",
+					.format(JsConst.URL_LOGIN_CHECK_ACCESS_TOKEN,
 							access_token, openid);
 			Log.i("EuexWeChat", "url=====>" + url);
 			NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
@@ -303,7 +334,7 @@ public class EuexWeChat extends EUExBase {
 			String openid = parms[1];
 
 			String url = String
-					.format("https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s",
+					.format(JsConst.URL_LOGIN_UNIONID,
 							access_token, openid);
 			Log.i("EuexWeChat", "url=====>" + url);
 			NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
@@ -321,10 +352,9 @@ public class EuexWeChat extends EUExBase {
 		@Override
 		protected String doInBackground(String... params) {
 			String url = params[0];
+            Log.i("EuexWeChat", "url->" + url);
 			byte[] buf = Utils.httpGet(url);
 			String callBack = new String(buf);
-			Log.i("EuexWeChat", "callBack=====>" + callBack);
-
 			return callBack;
 		}
 
@@ -332,31 +362,51 @@ public class EuexWeChat extends EUExBase {
 		protected void onPostExecute(String result) {
 			super.onPostExecute(result);
 			Log.i("countCode", "countCode=====>" + countCode);
-			if (countCode == 1) {
-				Log.i("EuexWeChat", "result=====>" + result);
-				jsCallback(CB_GETWEIXINLOGINACCESSTOKEN, 0,
-						EUExCallback.F_C_JSON, result);
-			} else if (countCode == 2) {
-				Log.i("EuexWeChat", "result=====>" + result);
-				jsCallback(CB_GETWEIXINLOGINREFRESHACCESSTOKEN, 0,
-						EUExCallback.F_C_JSON, result);
-			} else if (countCode == 3) {
+            if (isLoginNew){
+                switch (countCode){
+                    case Constants.token:
+                        callBackPluginJs(JsConst.CALLBACK_GET_LOGIN_ACCESS_TOKEN, result);
+                        break;
+                    case Constants.refresh:
+                        callBackPluginJs(JsConst.CALLBACK_GET_LOGIN_REFRESH_ACCESS_TOKEN, result);
+                        break;
+                    case Constants.check:
+                        callBackPluginJs(JsConst.CALLBACK_GET_LOGIN_CHECK_ACCESS_TOKEN, result);
+                        break;
+                    case Constants.union:
+                        callBackPluginJs(JsConst.CALLBACK_GET_LOGIN_UNION_I_D, result);
+                        break;
+                    default:
+                        break;
+                }
+                isLoginNew = false;
+            }else{
+                if (countCode == 1) {
+                    Log.i("EuexWeChat", "result=====>" + result);
+                    jsCallback(CB_GETWEIXINLOGINACCESSTOKEN, 0,
+                            EUExCallback.F_C_JSON, result);
+                } else if (countCode == 2) {
+                    Log.i("EuexWeChat", "result=====>" + result);
+                    jsCallback(CB_GETWEIXINLOGINREFRESHACCESSTOKEN, 0,
+                            EUExCallback.F_C_JSON, result);
+                } else if (countCode == 3) {
 
-				CheckModel model = AnalJson.getJson(result);
-				String re = "";
-				if (!("0".equals(model.errcode))) {
-					re = "1";
-				} else {
-					re = "0";
-				}
-				Log.i("CheckModel", "re=====>"+re);
-				
-				jsCallback(CB_GETWEIXINLOGINCHECKACCESSTOKEN, 0,
-						EUExCallback.F_C_JSON, re);
-			} else if (countCode == 4) {
-				jsCallback(CB_GETWEIXINLOGINUNIONID, 0, EUExCallback.F_C_JSON,
-						result);
-			}
+                    CheckModel model = AnalJson.getJson(result);
+                    String re = "";
+                    if (!("0".equals(model.errcode))) {
+                        re = "1";
+                    } else {
+                        re = "0";
+                    }
+                    Log.i("CheckModel", "re=====>"+re);
+
+                    jsCallback(CB_GETWEIXINLOGINCHECKACCESSTOKEN, 0,
+                            EUExCallback.F_C_JSON, re);
+                } else if (countCode == 4) {
+                    jsCallback(CB_GETWEIXINLOGINUNIONID, 0, EUExCallback.F_C_JSON,
+                            result);
+                }
+            }
 
 		}
 	}
@@ -1175,7 +1225,171 @@ public class EuexWeChat extends EUExBase {
         WXPayGetPrepayIdTask task = new WXPayGetPrepayIdTask(mContext, dataVO);
         task.pay();
     }
+    public void login(String[] params) {
+        if (params == null || params.length < 1) {
+            errorCallback(0, 0, "error params!");
+            return;
+        }
+        Message msg = new Message();
+        msg.obj = this;
+        msg.what = MSG_LOGIN;
+        Bundle bd = new Bundle();
+        bd.putStringArray(BUNDLE_DATA, params);
+        msg.setData(bd);
+        mHandler.sendMessage(msg);
+    }
 
+    private void loginMsg(String[] params) {
+        String json = params[0];
+        if (TextUtils.isEmpty(appId)){
+            errorCallback(0, 0, "please register first!");
+            return;
+        }
+        isLoginNew = true;
+        LoginVO dataVO = DataHelper.gson.fromJson(json, LoginVO.class);
+        dataVO.setAppid(appId);
+        SendAuth.Req req = new SendAuth.Req();
+        req.scope = dataVO.getScope();// "snsapi_userinfo"
+        req.state = dataVO.getState();// "wechat_sdk_demo_test"
+        Log.d(TAG, req.scope + "=======>" + req.state + "======appId====>"
+                + appId);
+        api.sendReq(req);
+    }
+
+    public void getLoginAccessToken(String[] params) {
+        if (params == null || params.length < 1) {
+            errorCallback(0, 0, "error params!");
+            return;
+        }
+        Message msg = new Message();
+        msg.obj = this;
+        msg.what = MSG_GET_LOGIN_ACCESS_TOKEN;
+        Bundle bd = new Bundle();
+        bd.putStringArray(BUNDLE_DATA, params);
+        msg.setData(bd);
+        mHandler.sendMessage(msg);
+    }
+
+    private void getLoginAccessTokenMsg(String[] params) {
+        Log.i("EuexWeChat", "getLoginAccessTokenMsg->" + Arrays.toString(params));
+        String json = params[0];
+        if (TextUtils.isEmpty(appId)){
+            errorCallback(0, 0, "please register first!");
+            return;
+        }
+        LoginAccessTokenVO dataVO = DataHelper.gson.fromJson(json, LoginAccessTokenVO.class);
+        dataVO.setAppid(appId);
+        isLoginNew = true;
+        try {
+            countCode = Constants.token;
+            String url = String
+                    .format(JsConst.URL_LOGIN_GET_ACCESS_TOKEN,
+                            dataVO.getAppid(), dataVO.getSecret(),
+                            dataVO.getCode(), dataVO.getGrant_type());
+            NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
+            token.execute(url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getLoginRefreshAccessToken(String[] params) {
+        if (params == null || params.length < 1) {
+            errorCallback(0, 0, "error params!");
+            return;
+        }
+        Message msg = new Message();
+        msg.obj = this;
+        msg.what = MSG_GET_LOGIN_REFRESH_ACCESS_TOKEN;
+        Bundle bd = new Bundle();
+        bd.putStringArray(BUNDLE_DATA, params);
+        msg.setData(bd);
+        mHandler.sendMessage(msg);
+    }
+
+    private void getLoginRefreshAccessTokenMsg(String[] params) {
+        Log.i("EuexWeChat", "getLoginRefreshAccessTokenMsg->" + Arrays.toString(params));
+        String json = params[0];
+        if (TextUtils.isEmpty(appId)){
+            errorCallback(0, 0, "please register first!");
+            return;
+        }
+        LoginRefreshTokenVO dataVO = DataHelper.gson.fromJson(json, LoginRefreshTokenVO.class);
+        dataVO.setAppid(appId);
+        isLoginNew = true;
+        try {
+            countCode = Constants.refresh;
+            String url = String
+                    .format(JsConst.URL_LOGIN_REFRESH_ACCESS_TOKEN, dataVO.getAppid(),
+                            dataVO.getGrant_type(), dataVO.getRefresh_token());
+            NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
+            token.execute(url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getLoginCheckAccessToken(String[] params) {
+        if (params == null || params.length < 1) {
+            errorCallback(0, 0, "error params!");
+            return;
+        }
+        Message msg = new Message();
+        msg.obj = this;
+        msg.what = MSG_GET_LOGIN_CHECK_ACCESS_TOKEN;
+        Bundle bd = new Bundle();
+        bd.putStringArray(BUNDLE_DATA, params);
+        msg.setData(bd);
+        mHandler.sendMessage(msg);
+    }
+
+    private void getLoginCheckAccessTokenMsg(String[] params) {
+        Log.i("EuexWeChat", "getLoginCheckAccessTokenMsg->" + Arrays.toString(params));
+        String json = params[0];
+        LoginCheckTokenVO dataVO = DataHelper.gson.fromJson(json, LoginCheckTokenVO.class);
+        isLoginNew = true;
+        try {
+            countCode = Constants.check;
+            String url = String
+                    .format(JsConst.URL_LOGIN_CHECK_ACCESS_TOKEN,
+                            dataVO.getAccess_token(), dataVO.getOpenid());
+            NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
+            token.execute(url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getLoginUnionID(String[] params) {
+        if (params == null || params.length < 1) {
+            errorCallback(0, 0, "error params!");
+            return;
+        }
+        Message msg = new Message();
+        msg.obj = this;
+        msg.what = MSG_GET_LOGIN_UNION_I_D;
+        Bundle bd = new Bundle();
+        bd.putStringArray(BUNDLE_DATA, params);
+        msg.setData(bd);
+        mHandler.sendMessage(msg);
+    }
+
+    private void getLoginUnionIDMsg(String[] params) {
+        Log.i("EuexWeChat", "getLoginUnionIDMsg->" + Arrays.toString(params));
+        String json = params[0];
+        LoginCheckTokenVO dataVO = DataHelper.gson.fromJson(json, LoginCheckTokenVO.class);
+        isLoginNew = true;
+        try {
+            countCode = Constants.union;
+            String url = String
+                    .format(JsConst.URL_LOGIN_UNIONID,
+                            dataVO.getAccess_token(), dataVO.getOpenid());
+            NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
+            token.execute(url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     public void onHandleMessage(Message message) {
         if(message == null){
@@ -1189,6 +1403,21 @@ public class EuexWeChat extends EUExBase {
                 break;
             case MSG_START_PAY:
                 startPayMsg(bundle.getStringArray(BUNDLE_DATA));
+                break;
+            case MSG_LOGIN:
+                loginMsg(bundle.getStringArray(BUNDLE_DATA));
+                break;
+            case MSG_GET_LOGIN_ACCESS_TOKEN:
+                getLoginAccessTokenMsg(bundle.getStringArray(BUNDLE_DATA));
+                break;
+            case MSG_GET_LOGIN_REFRESH_ACCESS_TOKEN:
+                getLoginRefreshAccessTokenMsg(bundle.getStringArray(BUNDLE_DATA));
+                break;
+            case MSG_GET_LOGIN_CHECK_ACCESS_TOKEN:
+                getLoginCheckAccessTokenMsg(bundle.getStringArray(BUNDLE_DATA));
+                break;
+            case MSG_GET_LOGIN_UNION_I_D:
+                getLoginUnionIDMsg(bundle.getStringArray(BUNDLE_DATA));
                 break;
             default:
                 super.onHandleMessage(message);
