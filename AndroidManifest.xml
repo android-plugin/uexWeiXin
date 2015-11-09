@@ -56,7 +56,8 @@
                 <action android:name="org.zywx.push.receive" />
             </intent-filter>
         </receiver>
-        <activity
+        <!--此处注释掉是为了本地调试方便，若不注释掉，分享完成返回的时候会报错，但不影响大众版在线打包-->
+        <!--<activity
             android:name=".wxapi.WXEntryActivity"
             android:exported="true"
             android:theme="@style/plugin_uexweixin_Transparent"
@@ -67,7 +68,7 @@
             android:exported="true"
              android:theme="@style/plugin_uexweixin_Transparent"
             android:launchMode="singleTop" >
-        </activity>
+        </activity>-->
     </application>
 
     <uses-sdk android:minSdkVersion="4" />
