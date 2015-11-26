@@ -36,6 +36,7 @@ import org.zywx.wbpalmstar.engine.DataHelper;
 import org.zywx.wbpalmstar.engine.EBrowserView;
 import org.zywx.wbpalmstar.engine.universalex.EUExBase;
 import org.zywx.wbpalmstar.engine.universalex.EUExCallback;
+import org.zywx.wbpalmstar.plugin.uexweixin.VO.CallbackWindowNameVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginAccessTokenVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginCheckTokenVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginRefreshTokenVO;
@@ -96,8 +97,6 @@ public class EuexWeChat extends EUExBase {
 	private static final int SHARE_IMAGE_CONTENT_CODE = 4;
 	private static final int SHARE_LINK_CONTENT_CODE = 5;
 
-	private int code;
-
 	private static IWXAPI api;
 	public static WeChatCallBack weChatCallBack;
 	private String appId;
@@ -117,7 +116,9 @@ public class EuexWeChat extends EUExBase {
     private static final int MSG_GET_LOGIN_REFRESH_ACCESS_TOKEN = 8;
     private static final int MSG_GET_LOGIN_CHECK_ACCESS_TOKEN = 9;
     private static final int MSG_GET_LOGIN_UNION_I_D = 10;
-    private boolean isLoginNew = false;
+    private static boolean isLoginNew = false;
+    private static int code;
+    private static String mWindowName = null;
 
 	public EuexWeChat(Context context, EBrowserView parent) {
 		super(context, parent);
@@ -145,7 +146,7 @@ public class EuexWeChat extends EUExBase {
 		weChatCallBack = new WeChatCallBack() {
 			@Override
 			public void callBackPayResult(BaseResp msg) {
-				jsCallbackAsyn(CB_GET_PAY_RESULT, 0, EUExCallback.F_C_JSON,
+                callbackOldInterface(CB_GET_PAY_RESULT, 0, EUExCallback.F_C_JSON,
                         getJson(msg.errCode + "", msg.errStr));
                 callBackPluginJsAsync(JsConst.CALLBACK_START_PAY,
                         getJson(msg.errCode + "", msg.errStr));
@@ -156,11 +157,11 @@ public class EuexWeChat extends EUExBase {
 				Log.i("WXEntryActivity", "callBackShareResult->errorCode="
 						+ message);
 				if (code == 1) {// 类型代表是文字类型
-					jsCallbackAsyn(CB_SEND_TEXT_CONTENT, 0,
-							EUExCallback.F_C_INT, message == 0 ? "0" : "1");
+                    callbackOldInterface(CB_SEND_TEXT_CONTENT, 0,
+                            EUExCallback.F_C_INT, message == 0 ? "0" : "1");
 				} else if (code == 2) {// 类型代表是图片类型
-					jsCallbackAsyn(CB_SEND_IMAGE_CONTENT, 0,
-							EUExCallback.F_C_INT, message == 0 ? "0" : "1");
+                    callbackOldInterface(CB_SEND_IMAGE_CONTENT, 0,
+                            EUExCallback.F_C_INT, message == 0 ? "0" : "1");
 				} else if (code == SHARE_TEXT_CONTENT_CODE) {
 					shareCallBack(CB_SHARE_TEXT_CONTENT, message == 0 ? "0"
 							: "1");
@@ -195,17 +196,11 @@ public class EuexWeChat extends EUExBase {
                     }
                     isLoginNew = false;
                 }else{
-                    jsCallbackAsyn(CB_LOGIN_WEIXIN, 0, EUExCallback.F_C_TEXT,
+                    callbackOldInterface(CB_LOGIN_WEIXIN, 0, EUExCallback.F_C_TEXT,
                             msg.errCode + "");
                 }
 			}
 		};
-	}
-
-	private void shareCallBack(String funName, String code) {
-		String js = SCRIPT_HEADER + "if(" + funName + "){" + funName + "('"
-				+ code + "')}";
-		mBrwView.addUriTaskAsyn(js);
 	}
 
 	/**
@@ -1390,6 +1385,16 @@ public class EuexWeChat extends EUExBase {
             e.printStackTrace();
         }
     }
+
+    public void setCallbackWindowName(String[] params){
+        if (params == null || params.length < 1) return;
+        CallbackWindowNameVO dataVO = DataHelper.gson.fromJson(params[0],
+                CallbackWindowNameVO.class);
+        if (dataVO != null){
+            mWindowName = dataVO.getWindowName();
+        }
+    }
+
     @Override
     public void onHandleMessage(Message message) {
         if(message == null){
@@ -1435,9 +1440,22 @@ public class EuexWeChat extends EUExBase {
         String js = SCRIPT_HEADER + "if(" + methodName + "){"
                 + methodName + "('" + jsonData + "');}";
         Log.i(TAG, "callBackPluginJsAsync:" + js);
-        mBrwView.addUriTaskAsyn(js);
+        evaluateScript(mWindowName, 0, js);
+        //mBrwView.addUriTaskAsyn(js);
+    }
+    private void callbackOldInterface(String functionName, int opId, int type, String content) {
+        String js = SCRIPT_HEADER + "if(" + functionName + "){"
+                + functionName + "(" + opId + "," + type + ",'"
+                + content + "'" + SCRIPT_TAIL;
+        evaluateScript(mWindowName, 0, js);
     }
 
+    private void shareCallBack(String funName, String code) {
+        String js = SCRIPT_HEADER + "if(" + funName + "){" + funName + "('"
+                + code + "')}";
+        //mBrwView.addUriTaskAsyn(js);
+        evaluateScript(mWindowName, 0, js);
+    }
     OnPayResultListener listener = new OnPayResultListener() {
         @Override
         public void onGetPrepayResult(String json) {

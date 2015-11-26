@@ -32,5 +32,7 @@
         <method name="getLoginRefreshAccessToken"/>
         <method name="getLoginCheckAccessToken"/>
         <method name="getLoginUnionID"/>
+
+        <method name = "setCallbackWindowName"/>
     </plugin>
 </uexplugins>

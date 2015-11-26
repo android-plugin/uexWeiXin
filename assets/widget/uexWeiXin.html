@@ -27,15 +27,6 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
         {
             alert("cbIsSupportPay："+data);
         }
-        uexWeiXin.cbGotoPay = function(opCode,dataType,data)
-        {
-            alert("cbGotoPay："+data);
-        }
-        
-        uexWeiXin.cbGenerateAdvanceOrder = function(opCode,dataType,data)
-        {
-            alert("cbGenerateAdvanceOrder："+data);
-        }
         
         uexWeiXin.cbGetAccessToken = function(opCode,dataType,data)
         {
@@ -79,7 +70,7 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
 			alert("cbShareLinkContent："+data);
         };
         uexWeiXin.cbWeiXinLogin = function (code) {
-            alert(code);
+            alert("cbWeiXinLogin:" + code);
         }
             uexWeiXin.cbGetWeiXinLoginAccessToken = function (opCode,dataType,data) {
                 alert(data);
@@ -110,6 +101,14 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
             uexWeiXin.cbGetLoginRefreshAccessToken = cbGetLoginRefreshAccessToken;
             uexWeiXin.cbGetLoginCheckAccessToken = cbGetLoginCheckAccessToken;
             uexWeiXin.cbGetLoginUnionID = cbGetLoginUnionID;
+            uexWindow.onStateChange=function(state){
+                if(state == 0){
+                    var params = {
+                        windowName:"root"
+                    };
+                    uexWeiXin.setCallbackWindowName(JSON.stringify(params));
+                }
+            }
     }
     var code = "";
     var refreshToken = "";
@@ -225,6 +224,10 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
     }
     function openNewWin(){
         uexWindow.open('pay', '0', "index.html", '2', '', '', 4);
+        var params = {
+             windowName:"pay"
+        };
+        uexWeiXin.setCallbackWindowName(JSON.stringify(params));
     }
 
     function cbLogin(info){
