@@ -512,7 +512,6 @@ public class EuexWeChat extends EUExBase {
                 BUtility.makeUrl(mBrwView.getCurrentUrl(), thumbImgPath),
                 mBrwView.getCurrentWidget().m_widgetPath,
                 mBrwView.getCurrentWidget().m_wgtType);
-        Log.i("djf", "sendImageContent->" + imgPath + "," + thumbPath);
 		WXImageObject imgObj = createImageObject(imgPath);
 
 		// 如果没有缩略图地址，图片地址赋值给缩略图地址，生成缩略图
