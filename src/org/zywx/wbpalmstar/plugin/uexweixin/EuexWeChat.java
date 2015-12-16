@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.TextureView;
 import android.widget.Toast;
 
 import com.tencent.mm.sdk.constants.Build;
@@ -1187,10 +1186,14 @@ public class EuexWeChat extends EUExBase {
     }
 
     private void getPrepayIdMsg(String[] params) {
-        String json = params[0];
-        PrePayDataVO dataVO = DataHelper.gson.fromJson(json, PrePayDataVO.class);
-        WXPayGetPrepayIdTask task = new WXPayGetPrepayIdTask(mContext, dataVO, listener);
-        task.getPrepayId();
+        try {
+			String json = params[0];
+			PrePayDataVO dataVO = DataHelper.gson.fromJson(json, PrePayDataVO.class);
+			WXPayGetPrepayIdTask task = new WXPayGetPrepayIdTask(mContext, dataVO, listener);
+			task.getPrepayId();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
     }
 
     public void startPay(String[] params) {
@@ -1209,15 +1212,15 @@ public class EuexWeChat extends EUExBase {
 
     private void startPayMsg(String[] params) {
         String json = params[0];
-        PayDataVO dataVO = DataHelper.gson.fromJson(json, PayDataVO.class);
         try {
+        	PayDataVO dataVO = DataHelper.gson.fromJson(json, PayDataVO.class);
             JSONObject jsonObject = new JSONObject(json);
             dataVO.setPackageValue(jsonObject.getString(JsConst.PACKAGE_VALUE));
-        } catch (JSONException e) {
+            WXPayGetPrepayIdTask task = new WXPayGetPrepayIdTask(mContext, dataVO);
+        	task.pay();
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        WXPayGetPrepayIdTask task = new WXPayGetPrepayIdTask(mContext, dataVO);
-        task.pay();
     }
     public void login(String[] params) {
         if (params == null || params.length < 1) {
@@ -1240,14 +1243,17 @@ public class EuexWeChat extends EUExBase {
             return;
         }
         isLoginNew = true;
-        LoginVO dataVO = DataHelper.gson.fromJson(json, LoginVO.class);
-        dataVO.setAppid(appId);
-        SendAuth.Req req = new SendAuth.Req();
-        req.scope = dataVO.getScope();// "snsapi_userinfo"
-        req.state = dataVO.getState();// "wechat_sdk_demo_test"
-        Log.d(TAG, req.scope + "=======>" + req.state + "======appId====>"
-                + appId);
-        api.sendReq(req);
+		try {
+			LoginVO dataVO = DataHelper.gson.fromJson(json, LoginVO.class);
+			dataVO.setAppid(appId);
+			SendAuth.Req req = new SendAuth.Req();
+			req.scope = dataVO.getScope();// "snsapi_userinfo"
+			req.state = dataVO.getState();// "wechat_sdk_demo_test"
+			Log.d(TAG, req.scope + "=======>" + req.state + "======appId====>" + appId);
+			api.sendReq(req);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
     }
 
     public void getLoginAccessToken(String[] params) {
@@ -1271,10 +1277,10 @@ public class EuexWeChat extends EUExBase {
             errorCallback(0, 0, "please register first!");
             return;
         }
-        LoginAccessTokenVO dataVO = DataHelper.gson.fromJson(json, LoginAccessTokenVO.class);
-        dataVO.setAppid(appId);
-        isLoginNew = true;
         try {
+        	LoginAccessTokenVO dataVO = DataHelper.gson.fromJson(json, LoginAccessTokenVO.class);
+        	dataVO.setAppid(appId);
+        	isLoginNew = true;
             countCode = Constants.token;
             String url = String
                     .format(JsConst.URL_LOGIN_GET_ACCESS_TOKEN,
@@ -1308,10 +1314,10 @@ public class EuexWeChat extends EUExBase {
             errorCallback(0, 0, "please register first!");
             return;
         }
-        LoginRefreshTokenVO dataVO = DataHelper.gson.fromJson(json, LoginRefreshTokenVO.class);
-        dataVO.setAppid(appId);
-        isLoginNew = true;
         try {
+        	LoginRefreshTokenVO dataVO = DataHelper.gson.fromJson(json, LoginRefreshTokenVO.class);
+        	dataVO.setAppid(appId);
+        	isLoginNew = true;
             countCode = Constants.refresh;
             String url = String
                     .format(JsConst.URL_LOGIN_REFRESH_ACCESS_TOKEN, dataVO.getAppid(),
@@ -1340,9 +1346,9 @@ public class EuexWeChat extends EUExBase {
     private void getLoginCheckAccessTokenMsg(String[] params) {
         Log.i("EuexWeChat", "getLoginCheckAccessTokenMsg->" + Arrays.toString(params));
         String json = params[0];
-        LoginCheckTokenVO dataVO = DataHelper.gson.fromJson(json, LoginCheckTokenVO.class);
-        isLoginNew = true;
         try {
+        	LoginCheckTokenVO dataVO = DataHelper.gson.fromJson(json, LoginCheckTokenVO.class);
+        	isLoginNew = true;
             countCode = Constants.check;
             String url = String
                     .format(JsConst.URL_LOGIN_CHECK_ACCESS_TOKEN,
@@ -1371,9 +1377,9 @@ public class EuexWeChat extends EUExBase {
     private void getLoginUnionIDMsg(String[] params) {
         Log.i("EuexWeChat", "getLoginUnionIDMsg->" + Arrays.toString(params));
         String json = params[0];
-        LoginCheckTokenVO dataVO = DataHelper.gson.fromJson(json, LoginCheckTokenVO.class);
-        isLoginNew = true;
         try {
+        	LoginCheckTokenVO dataVO = DataHelper.gson.fromJson(json, LoginCheckTokenVO.class);
+        	isLoginNew = true;
             countCode = Constants.union;
             String url = String
                     .format(JsConst.URL_LOGIN_UNIONID,
@@ -1386,12 +1392,17 @@ public class EuexWeChat extends EUExBase {
     }
 
     public void setCallbackWindowName(String[] params){
-        if (params == null || params.length < 1) return;
-        CallbackWindowNameVO dataVO = DataHelper.gson.fromJson(params[0],
-                CallbackWindowNameVO.class);
-        if (dataVO != null){
-            mWindowName = dataVO.getWindowName();
-        }
+        try {
+			if (params == null || params.length < 1) 
+				return;
+			CallbackWindowNameVO dataVO = DataHelper.gson.fromJson(params[0],
+			        CallbackWindowNameVO.class);
+			if (dataVO != null){
+			    mWindowName = dataVO.getWindowName();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
     }
 
     @Override
