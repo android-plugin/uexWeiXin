@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexWeiXin" version="3.1.32" build = "32">
-        <info>32:新增setCallbackWindowName接口，解决偶尔收不到回调的问题。</info>
+    <plugin uexName="uexWeiXin" version="3.1.33" build = "33">
+        <info>33:增加抛出异常的捕获</info>
+        <build>32:新增setCallbackWindowName接口，解决偶尔收不到回调的问题。</build>
         <build>31:更新微信登陆相关接口。</build>
         <build>30:修复微信支付返回时偶尔没有回调的问题。</build>
         <build>29:微信支付sdk升级</build>
