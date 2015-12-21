@@ -165,6 +165,7 @@ public class WXPayGetPrepayIdTask {
             return xml;
         } catch (Exception e) {
             Log.e("orion",e.toString());
+            e.printStackTrace();
         }
         return null;
 
@@ -223,6 +224,7 @@ public class WXPayGetPrepayIdTask {
 
         } catch (Exception e) {
             Log.e(TAG, "genProductArgs fail, ex = " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
