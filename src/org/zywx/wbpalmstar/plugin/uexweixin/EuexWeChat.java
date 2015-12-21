@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.TextureView;
 import android.widget.Toast;
 
 import com.tencent.mm.sdk.constants.Build;
@@ -137,6 +136,8 @@ public class EuexWeChat extends EUExBase {
 			Log.d("path", myString);
 			return myString;
 		} catch (JSONException e) {
+			Toast.makeText(mContext, "getJson错误：" + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
 			e.printStackTrace();
 		}
 		return null;
@@ -264,7 +265,8 @@ public class EuexWeChat extends EUExBase {
 			NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
 			token.execute(url);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			Toast.makeText(mContext, "错误：" + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
 			e.printStackTrace();
 		}
 
@@ -288,7 +290,8 @@ public class EuexWeChat extends EUExBase {
 			NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
 			token.execute(url);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			Toast.makeText(mContext, "错误：" + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
 			e.printStackTrace();
 		}
 
@@ -311,7 +314,8 @@ public class EuexWeChat extends EUExBase {
 			NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
 			token.execute(url);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
+			Toast.makeText(mContext, "错误：" + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
 			e.printStackTrace();
 		}
 
@@ -336,9 +340,9 @@ public class EuexWeChat extends EUExBase {
 			token.execute(url);
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			Toast.makeText(mContext, "错误：" + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
+			e.printStackTrace();		}
 
 	}
 
@@ -417,8 +421,9 @@ public class EuexWeChat extends EUExBase {
 			String text = params[1];
 			return sendTextContent(scene, text);
 		} catch (Exception e) {
-			Toast.makeText(mContext, "参数错误： " + params[0], Toast.LENGTH_SHORT)
+			Toast.makeText(mContext, "错误： " + e.getMessage(), Toast.LENGTH_SHORT)
 					.show();
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -441,6 +446,7 @@ public class EuexWeChat extends EUExBase {
 		} catch (Exception e) {
 			Toast.makeText(mContext, "参数错误：" + e.getMessage(),
 					Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -687,6 +693,7 @@ public class EuexWeChat extends EUExBase {
 				}
 			} catch (Exception e) {
 				localRetCode = LocalRetCode.ERR_JSON;
+				e.printStackTrace();
 			}
 		}
 	}
@@ -853,6 +860,7 @@ public class EuexWeChat extends EUExBase {
             json.put("sign_method", "sha1");
         } catch (Exception e) {
             Log.e(TAG, "genProductArgs fail, ex = " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
         
@@ -950,6 +958,7 @@ public class EuexWeChat extends EUExBase {
 
 			} catch (Exception e) {
 				localRetCode = LocalRetCode.ERR_JSON;
+				e.printStackTrace();
 			}
 		}
 	}
@@ -981,8 +990,9 @@ public class EuexWeChat extends EUExBase {
 			String text = jsonObject.getString(PARAMS_JSON_KEY_TEXT);
 			return sendTextContent(scene, text);
 		} catch (Exception e) {
-			Toast.makeText(mContext, "参数错误： " + params[0], Toast.LENGTH_SHORT)
+			Toast.makeText(mContext, "参数错误：" + e.getMessage(), Toast.LENGTH_SHORT)
 					.show();
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -999,6 +1009,7 @@ public class EuexWeChat extends EUExBase {
 		} catch (Exception e) {
 			Toast.makeText(mContext, "参数错误：" + e.getMessage(),
 					Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -1060,6 +1071,7 @@ public class EuexWeChat extends EUExBase {
 		} catch (Exception e) {
 			Toast.makeText(mContext, "参数错误：" + e.getMessage(),
 					Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -1131,6 +1143,7 @@ public class EuexWeChat extends EUExBase {
 				} catch (Exception e) {
 					Toast.makeText(mContext, "图片不存在： " + e.getMessage(),
 							Toast.LENGTH_SHORT).show();
+					e.printStackTrace();
 				}
 			}
 		}
@@ -1145,6 +1158,8 @@ public class EuexWeChat extends EUExBase {
 				bmp = BitmapFactory.decodeStream(new URL(thumbPath)
 						.openStream());
 			} catch (Exception e) {
+				Toast.makeText(mContext, "错误：" + e.getMessage(),
+						Toast.LENGTH_SHORT).show();
 				e.printStackTrace();
 			}
 		} else {
@@ -1159,6 +1174,8 @@ public class EuexWeChat extends EUExBase {
 				try {
 					bmp = BitmapFactory.decodeStream(mContext.getAssets().open(thumbPath));
 				} catch (IOException e) {
+					Toast.makeText(mContext, "错误：" + e.getMessage(),
+							Toast.LENGTH_SHORT).show();
 					e.printStackTrace();
 				}
 			}
@@ -1187,10 +1204,16 @@ public class EuexWeChat extends EUExBase {
     }
 
     private void getPrepayIdMsg(String[] params) {
-        String json = params[0];
-        PrePayDataVO dataVO = DataHelper.gson.fromJson(json, PrePayDataVO.class);
-        WXPayGetPrepayIdTask task = new WXPayGetPrepayIdTask(mContext, dataVO, listener);
-        task.getPrepayId();
+        try {
+			String json = params[0];
+			PrePayDataVO dataVO = DataHelper.gson.fromJson(json, PrePayDataVO.class);
+			WXPayGetPrepayIdTask task = new WXPayGetPrepayIdTask(mContext, dataVO, listener);
+			task.getPrepayId();
+		} catch (Exception e) {
+			Toast.makeText(mContext, "参数错误：" + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
+		}
     }
 
     public void startPay(String[] params) {
@@ -1209,15 +1232,17 @@ public class EuexWeChat extends EUExBase {
 
     private void startPayMsg(String[] params) {
         String json = params[0];
-        PayDataVO dataVO = DataHelper.gson.fromJson(json, PayDataVO.class);
         try {
+        	PayDataVO dataVO = DataHelper.gson.fromJson(json, PayDataVO.class);
             JSONObject jsonObject = new JSONObject(json);
             dataVO.setPackageValue(jsonObject.getString(JsConst.PACKAGE_VALUE));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        WXPayGetPrepayIdTask task = new WXPayGetPrepayIdTask(mContext, dataVO);
-        task.pay();
+            WXPayGetPrepayIdTask task = new WXPayGetPrepayIdTask(mContext, dataVO);
+        	task.pay();
+        } catch (Exception e) {
+        	Toast.makeText(mContext, "参数错误：" + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
+		}
     }
     public void login(String[] params) {
         if (params == null || params.length < 1) {
@@ -1240,14 +1265,19 @@ public class EuexWeChat extends EUExBase {
             return;
         }
         isLoginNew = true;
-        LoginVO dataVO = DataHelper.gson.fromJson(json, LoginVO.class);
-        dataVO.setAppid(appId);
-        SendAuth.Req req = new SendAuth.Req();
-        req.scope = dataVO.getScope();// "snsapi_userinfo"
-        req.state = dataVO.getState();// "wechat_sdk_demo_test"
-        Log.d(TAG, req.scope + "=======>" + req.state + "======appId====>"
-                + appId);
-        api.sendReq(req);
+		try {
+			LoginVO dataVO = DataHelper.gson.fromJson(json, LoginVO.class);
+			dataVO.setAppid(appId);
+			SendAuth.Req req = new SendAuth.Req();
+			req.scope = dataVO.getScope();// "snsapi_userinfo"
+			req.state = dataVO.getState();// "wechat_sdk_demo_test"
+			Log.d(TAG, req.scope + "=======>" + req.state + "======appId====>" + appId);
+			api.sendReq(req);
+		} catch (Exception e) {
+			Toast.makeText(mContext, "参数错误：" + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
+		}
     }
 
     public void getLoginAccessToken(String[] params) {
@@ -1271,10 +1301,10 @@ public class EuexWeChat extends EUExBase {
             errorCallback(0, 0, "please register first!");
             return;
         }
-        LoginAccessTokenVO dataVO = DataHelper.gson.fromJson(json, LoginAccessTokenVO.class);
-        dataVO.setAppid(appId);
-        isLoginNew = true;
         try {
+        	LoginAccessTokenVO dataVO = DataHelper.gson.fromJson(json, LoginAccessTokenVO.class);
+        	dataVO.setAppid(appId);
+        	isLoginNew = true;
             countCode = Constants.token;
             String url = String
                     .format(JsConst.URL_LOGIN_GET_ACCESS_TOKEN,
@@ -1283,8 +1313,10 @@ public class EuexWeChat extends EUExBase {
             NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
             token.execute(url);
         } catch (Exception e) {
-            e.printStackTrace();
-        }
+        	Toast.makeText(mContext, "参数错误：" + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
+		}
     }
 
     public void getLoginRefreshAccessToken(String[] params) {
@@ -1308,10 +1340,10 @@ public class EuexWeChat extends EUExBase {
             errorCallback(0, 0, "please register first!");
             return;
         }
-        LoginRefreshTokenVO dataVO = DataHelper.gson.fromJson(json, LoginRefreshTokenVO.class);
-        dataVO.setAppid(appId);
-        isLoginNew = true;
         try {
+        	LoginRefreshTokenVO dataVO = DataHelper.gson.fromJson(json, LoginRefreshTokenVO.class);
+        	dataVO.setAppid(appId);
+        	isLoginNew = true;
             countCode = Constants.refresh;
             String url = String
                     .format(JsConst.URL_LOGIN_REFRESH_ACCESS_TOKEN, dataVO.getAppid(),
@@ -1319,8 +1351,10 @@ public class EuexWeChat extends EUExBase {
             NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
             token.execute(url);
         } catch (Exception e) {
-            e.printStackTrace();
-        }
+        	Toast.makeText(mContext, "参数错误：" + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
+		}
     }
 
     public void getLoginCheckAccessToken(String[] params) {
@@ -1340,9 +1374,9 @@ public class EuexWeChat extends EUExBase {
     private void getLoginCheckAccessTokenMsg(String[] params) {
         Log.i("EuexWeChat", "getLoginCheckAccessTokenMsg->" + Arrays.toString(params));
         String json = params[0];
-        LoginCheckTokenVO dataVO = DataHelper.gson.fromJson(json, LoginCheckTokenVO.class);
-        isLoginNew = true;
         try {
+        	LoginCheckTokenVO dataVO = DataHelper.gson.fromJson(json, LoginCheckTokenVO.class);
+        	isLoginNew = true;
             countCode = Constants.check;
             String url = String
                     .format(JsConst.URL_LOGIN_CHECK_ACCESS_TOKEN,
@@ -1350,8 +1384,10 @@ public class EuexWeChat extends EUExBase {
             NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
             token.execute(url);
         } catch (Exception e) {
-            e.printStackTrace();
-        }
+        	Toast.makeText(mContext, "参数错误：" + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
+		}
     }
 
     public void getLoginUnionID(String[] params) {
@@ -1371,9 +1407,9 @@ public class EuexWeChat extends EUExBase {
     private void getLoginUnionIDMsg(String[] params) {
         Log.i("EuexWeChat", "getLoginUnionIDMsg->" + Arrays.toString(params));
         String json = params[0];
-        LoginCheckTokenVO dataVO = DataHelper.gson.fromJson(json, LoginCheckTokenVO.class);
-        isLoginNew = true;
         try {
+        	LoginCheckTokenVO dataVO = DataHelper.gson.fromJson(json, LoginCheckTokenVO.class);
+        	isLoginNew = true;
             countCode = Constants.union;
             String url = String
                     .format(JsConst.URL_LOGIN_UNIONID,
@@ -1381,17 +1417,26 @@ public class EuexWeChat extends EUExBase {
             NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
             token.execute(url);
         } catch (Exception e) {
-            e.printStackTrace();
+        	Toast.makeText(mContext, "参数错误：" + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
         }
     }
 
     public void setCallbackWindowName(String[] params){
-        if (params == null || params.length < 1) return;
-        CallbackWindowNameVO dataVO = DataHelper.gson.fromJson(params[0],
-                CallbackWindowNameVO.class);
-        if (dataVO != null){
-            mWindowName = dataVO.getWindowName();
-        }
+        try {
+			if (params == null || params.length < 1) 
+				return;
+			CallbackWindowNameVO dataVO = DataHelper.gson.fromJson(params[0],
+			        CallbackWindowNameVO.class);
+			if (dataVO != null){
+			    mWindowName = dataVO.getWindowName();
+			}
+		} catch (Exception e) {
+			Toast.makeText(mContext, "参数错误：" + e.getMessage(),
+					Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
+		}
     }
 
     @Override

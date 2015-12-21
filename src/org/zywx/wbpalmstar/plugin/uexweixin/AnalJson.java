@@ -13,7 +13,6 @@ public class AnalJson {
 			Log.i("AnalJson", "model.errcode"+model.errcode);
 			model.errmsg=jsob.getString("errmsg");
 		} catch (Exception e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		

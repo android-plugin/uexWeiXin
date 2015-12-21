@@ -248,6 +248,7 @@ public class Utils {
 			}
 			return new String(buf);
 		} catch (Exception e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
