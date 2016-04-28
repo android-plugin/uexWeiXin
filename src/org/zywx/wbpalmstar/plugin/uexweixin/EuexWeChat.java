@@ -1119,7 +1119,7 @@ public class EuexWeChat extends EUExBase {
 
 	private WXImageObject createImageObject(String imgPath) {
 		WXImageObject imgObj = new WXImageObject();
-		if (imgPath.startsWith("http://")) {
+		if (imgPath.startsWith("http://")||imgPath.startsWith("https://")) {
 			imgObj.imageUrl = imgPath;
 		} else {
 			if (imgPath.startsWith("/")) {
@@ -1153,7 +1153,7 @@ public class EuexWeChat extends EUExBase {
 	private Bitmap createThumbBitmap(String thumbPath) {
 		// 缩略图地址临时变量
 		Bitmap bmp = null;
-		if (thumbPath.startsWith("http://")) {
+		if (thumbPath.startsWith("http://")||thumbPath.startsWith("https://")) {
 			try {
 				bmp = BitmapFactory.decodeStream(new URL(thumbPath)
 						.openStream());
