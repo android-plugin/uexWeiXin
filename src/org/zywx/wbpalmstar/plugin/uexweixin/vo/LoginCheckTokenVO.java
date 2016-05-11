@@ -1,4 +1,4 @@
-package org.zywx.wbpalmstar.plugin.uexweixin.VO;
+package org.zywx.wbpalmstar.plugin.uexweixin.vo;
 
 import java.io.Serializable;
 
