@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexWeiXin" version="3.1.35.2" build = "35">
+    <plugin uexName="uexWeiXin" version="3.1.35" build = "35">
         <info>35:更新SDK，优化代码逻辑
               35.1:更新SDK,完善调试所需要的信息
               35.2:优化规范代码，删除无用代码，增加log和注释</info>
