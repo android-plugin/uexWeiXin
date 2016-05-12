@@ -11,4 +11,5 @@
 	6.MD5:  CE:18:7E:D6:7E:05:C2:D8:87:9B:F6:6B:BF:DF:C8:B9
 	
 三、微信分享相关key
-	AppID:wxd930ea5d5a258f4f
+	appId:wxd930ea5d5a258f4f
+	appSecret:db426a9829e4b49a0dcac7b4162da6b6

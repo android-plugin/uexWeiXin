@@ -1,12 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <uexplugins>
     <plugin 
-        className="org.zywx.wbpalmstar.plugin.uexweixin.EuexWeChat"
+        className="org.zywx.wbpalmstar.plugin.uexweixin.EUExWeiXin"
         uexName="uexWeiXin">
+        
+        <!-- 通用 -->
         <method name="registerApp" />
         <method name="isWXAppInstalled" />
+        
+        <!-- 微信分享 -->
+        <!-- 旧 -->
         <method name="sendTextContent" />
-        <method name="sendImageContent" />       
+        <method name="sendImageContent" /> 
+        <!-- 新 -->
+        <method name="shareTextContent" />
+        <method name="shareImageContent" />
+        <method name="shareLinkContent" />
+
+        <!-- 微信登录 -->
+        <!-- 旧 -->
+        <method name="weiXinLogin" />
+        <method name="getWeiXinLoginAccessToken" />
+        <method name="getWeiXinLoginRefreshAccessToken" />
+        <method name="getWeiXinLoginCheckAccessToken " />
+        <method name="getWeiXinLoginUnionID" />
+        <!-- 新 -->
+        <method name="login"/>
+        <method name="getLoginAccessToken"/>
+        <method name="getLoginRefreshAccessToken"/>
+        <method name="getLoginCheckAccessToken"/>
+        <method name="getLoginUnionID"/>
+
+        <!-- 微信支付 -->
+        <method name="getPrepayId"/>
+        <method name="startPay"/>
         <method name="isSupportPay" />
         <method name="getAccessToken" />
         <method name="generateAdvanceOrder" />
@@ -14,25 +41,7 @@
         <method name="gotoPay" />
         <method name="generatePrepayID" />
         <method name="sendPay" />
-        <method name="shareTextContent" />
-        <method name="shareImageContent" />
-        <method name="shareLinkContent" />
 
-        <method name="weiXinLogin" />
-        <method name="getWeiXinLoginAccessToken" />
-        <method name="getWeiXinLoginRefreshAccessToken" />
-        <method name="getWeiXinLoginCheckAccessToken " />
-        <method name="getWeiXinLoginUnionID" />
-
-        <method name="getPrepayId"/>
-        <method name="startPay"/>
-
-        <method name="login"/>
-        <method name="getLoginAccessToken"/>
-        <method name="getLoginRefreshAccessToken"/>
-        <method name="getLoginCheckAccessToken"/>
-        <method name="getLoginUnionID"/>
-
-        <method name = "setCallbackWindowName"/>
+        <method name="setCallbackWindowName"/>
     </plugin>
 </uexplugins>
