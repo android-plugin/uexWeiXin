@@ -1,0 +1,129 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport"
+	content="width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<link rel="stylesheet" type="text/css" href="css/index.css">
+
+<script type="text/javascript">
+
+	// 回调
+	window.uexOnload = function(type) {
+
+		// 注册应用到微信回调
+		uexWeiXin.cbRegisterApp = function(opCode, dataType, data) {
+			alert("------cbRegisterApp------\n" + data);
+		}
+		
+		// 判断是否安装微信应用回调
+		uexWeiXin.cbIsWXAppInstalled = function(opCode, dataType, data) {
+			alert("------cbIsWXAppInstalled------\n" + data);
+		}
+		
+		/* ------微信分享回调------ */
+		
+		// 分享文字回调
+		uexWeiXin.cbShareTextContent = function(opCode, dataType, data) {
+			alert("------cbShareTextContent------\n" + data);
+		}
+		
+		// 分享图片回调
+		uexWeiXin.cbShareImageContent = function(opCode, dataType, data) {
+			alert("------cbShareImageContent------\n" + data);
+		}
+		
+		// 分享链接回调
+		uexWeiXin.cbShareLinkContent = function(opCode, dataType, data) {
+			alert("------cbShareLinkContent------\n" + data);
+		}
+		
+		/* ------微信登录回调------ */
+		
+		// 微信授权登录(第一步：请求CODE)回调
+		uexWeiXin.cbWeiXinLogin = function(opCode, dataType, data) {
+			alert("------cbWeiXinLogin------\n" + data);
+		}
+	}
+	
+	// 注册应用到微信
+	function registerApp() {
+		var appId = "wxd930ea5d5a258f4f";
+		uexWeiXin.registerApp(appId);
+	}
+	
+	/* 微信分享 */
+	
+	// 分享文本
+	function shareTextContent() {
+		var json = {
+			scene : 0,
+			text : "这段文字发送自微信SDK示例程序"
+		};
+		uexWeiXin.shareTextContent(JSON.stringify(json));
+	}
+	
+	// 分享图片
+	function shareImageContent() {
+		var json = {
+			scene : 0,
+			thumbImg : "res://appcan.png",
+			image : "res://appcan.png"
+		};
+		uexWeiXin.shareImageContent(JSON.stringify(json));
+	}
+	
+	// 分享链接
+	function shareLinkContent() {
+		var json = {
+			scene : 0,
+			thumbImg : "res://icon.png",
+			wedpageUrl : "http://www.appcan.cn",
+			title : "你好,我是AppCan",
+			description : "中国最大的移动中间键平台AppCan对微信分享的图片支持测试"
+		};
+		uexWeiXin.shareLinkContent(JSON.stringify(json));
+	}
+	
+	/* 微信登录 */
+	
+	// 微信授权登录(第一步：请求CODE)
+	function weiXinLogin() {
+		var scope = "snsapi_userinfo";//,snsapi_base";
+		var state = "0744";
+		uexWeiXin.weiXinLogin(scope,state);
+	}
+	
+</script>
+</head>
+
+<body>
+	<div class="tit">uexWeiXin</div>
+	<div class="conbor">
+		<div class="consj">
+		
+			<span>registerApp</span>
+			<input class="btn" type="button" value="注册应用到微信" onclick="registerApp()" /><br /> <br />
+			
+			<span>isWXAppInstalled</span>
+			<input class="btn" type="button" value="判断是否安装微信" onclick="uexWeiXin.isWXAppInstalled()" /><br /> <br />
+			
+			<span>------微信分享------</span>
+			<span>shareTextContent</span>
+			<input class="btn" type="button" value="分享文本" onclick="shareTextContent()" />
+
+			<span>shareImageContent</span>
+			<input class="btn" type="button" value="分享图片" onclick="shareImageContent()" />
+
+			<span>shareLinkContent</span>
+			<input class="btn" type="button" value="分享链接" onclick="shareLinkContent()" />
+
+			<br/>
+			<span>------微信登录------</span>
+			<span>weiXinLogin</span>
+			<input class="btn" type="button" value="微信授权登录(第一步：请求CODE)" onclick="weiXinLogin()" />
+
+		</div>
+	</div>
+</body>
+</html>

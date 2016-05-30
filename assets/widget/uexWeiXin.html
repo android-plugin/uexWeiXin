@@ -11,64 +11,37 @@ content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, us
 var cText = 0;
 var cJson = 1;
 var cInt = 2;
-var appId = "wx0d75288570c90d62";
-var app_serect = "223ce5ca5e9bb8d90cf57a051c0595ed";
+var appId = "wxd930ea5d5a258f4f";
+var app_serect = "db426a9829e4b49a0dcac7b4162da6b6";
 var app_key = "L8LrMqqeGRxST5reouB0K66CaYAWpqhAVsq7ggKkxHCOastWksvuX1uvmvQclxaHoYd3ElNBrNO2DHnnzgfVG9Qs473M3DTOZug5er46FhuGofumV8H2FVR9qkjSlC5K";
 var partnerId = "1900000109";
 var traceId = "crestxu_test";
 var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3%92&fee_type=1&input_charset=UTF-8&notify_url=http%3A%2F%2Fweixin.qq.com&out_trade_no=9d86d83f925f2149e9edb0ac3b49229c&partner=1900000109&spbill_create_ip=196.168.1.1&total_fee=1&sign=899815E4F3106CC5DCFAF76A4D16069B";
 
     window.uexOnload = function(){
-        uexWeiXin.cbRegisterApp =function(opCode,dataType,data)
-        {
+    	
+    	/*------------通用回调-------------*/
+    	
+        uexWeiXin.cbRegisterApp =function(opCode,dataType,data){
             alert("cbRegisterApp："+data);
         }
-        uexWeiXin.cbIsSupportPay =function(opCode,dataType,data)
-        {
-            alert("cbIsSupportPay："+data);
-        }
-        uexWeiXin.cbGotoPay = function(opCode,dataType,data)
-        {
-            alert("cbGotoPay："+data);
-        }
-        
-        uexWeiXin.cbGenerateAdvanceOrder = function(opCode,dataType,data)
-        {
-            alert("cbGenerateAdvanceOrder："+data);
-        }
-        
-        uexWeiXin.cbGetAccessToken = function(opCode,dataType,data)
-        {
-           alert("cbGetAccessToken："+data);
-        }
-        
-        
-        uexWeiXin.cbGetAccessTokenLocal = function(opCode,dataType,data)
-        {
-           alert("cbGetAccessTokenLocal:"+data);
-        }
-        
         uexWeiXin.cbIsWXAppInstalled=function(opCode,dataType,data){
             alert("cbIsWXAppInstalled："+data);
         };
         uexWeiXin.cbGetWXAppInstallUrl=function(opCode,dataType,data){
             alert("cbGetWXAppInstallUrl："+data);
         };
-
-        //是否安装微信客户端
-        uexWeiXin.cbIsWXAppInstalled = function(opCode, dataType, data){
-            alert("cbIsWXAppInstalled：" + data);
-        };
-        //分享文本是否成功的状态
+        
+        /*------------微信分享回调--------------*/
+        
+        //旧接口
         uexWeiXin.cbSendTextContent = function(opCode, dataType, data){
-             //data是状态码
              alert("cbSendTextContent："+data);
         };
-        //分享图片是否成功的状态
         uexWeiXin.cbSendImageContent = function(opCode, dataType, data){
-            //data是状态码
 			alert("cbSendImageContent："+data);
         };
+        //新接口
         uexWeiXin.cbShareTextContent = function(data){
 			alert("cbShareTextContent："+data);
         };
@@ -78,44 +51,120 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
         uexWeiXin.cbShareLinkContent = function(data){
 			alert("cbShareLinkContent："+data);
         };
+        
+        /*--------------微信登录回调--------------*/
+        
+        //旧接口
         uexWeiXin.cbWeiXinLogin = function (code) {
-            alert(code);
+            alert("cbWeiXinLogin:" + code);
         }
-            uexWeiXin.cbGetWeiXinLoginAccessToken = function (opCode,dataType,data) {
+        uexWeiXin.cbGetWeiXinLoginAccessToken = function (opCode,dataType,data) {
                 alert(data);
                 data = JSON.parse(data);
                 openid=data.openid;
-                access_token = data.access_token;
-                refresh_token = data.refresh_token;
-            }
-            uexWeiXin.cbGetWeiXinLoginUnionID = function (opCode,dataType,data) {
+                accessToken = data.access_token;
+                refreshToken = data.refresh_token;
+        }
+        uexWeiXin.cbGetWeiXinLoginCheckAccessToken = function (opCode,dataType,data) {
                 alert(data);
-            }
-            uexWeiXin.cbGetWeiXinLoginCheckAccessToken = function (opCode,dataType,data) {
-                alert(data);
-            }
-            //刷新后重新赋值
-            uexWeiXin.cbGetWeiXinLoginRefreshAccessToken = function (opCode,dataType,data) {
+        }
+        uexWeiXin.cbGetWeiXinLoginRefreshAccessToken = function (opCode,dataType,data) {//刷新后重新赋值
                 alert(data);
                 data = JSON.parse(data);
                 openid=data.openid;
-                access_token = data.access_token;
-                refresh_token = data.refresh_token;
-            }
-            uexWeiXin.cbGetWXAppInstallUrl=function(opCode,dataType,data){
-                alert("cbGetWXAppInstallUrl："+data);
-            };
-            uexWeiXin.cbLogin = cbLogin;
-            uexWeiXin.cbGetLoginAccessToken = cbGetLoginAccessToken;
-            uexWeiXin.cbGetLoginRefreshAccessToken = cbGetLoginRefreshAccessToken;
-            uexWeiXin.cbGetLoginCheckAccessToken = cbGetLoginCheckAccessToken;
-            uexWeiXin.cbGetLoginUnionID = cbGetLoginUnionID;
+                accessToken = data.access_token;
+                refreshToken = data.refresh_token;
+        }
+        uexWeiXin.cbGetWeiXinLoginUnionID = function (opCode,dataType,data) {
+            alert(data);
+    	}
+        //新接口
+        uexWeiXin.cbLogin = cbLogin;
+        uexWeiXin.cbGetLoginAccessToken = cbGetLoginAccessToken;
+        uexWeiXin.cbGetLoginRefreshAccessToken = cbGetLoginRefreshAccessToken;
+        uexWeiXin.cbGetLoginCheckAccessToken = cbGetLoginCheckAccessToken;
+        uexWeiXin.cbGetLoginUnionID = cbGetLoginUnionID;
+        
+        /*------------微信支付回调--------------*/
+        
+        uexWeiXin.cbIsSupportPay =function(opCode,dataType,data){
+           alert("cbIsSupportPay："+data);
+        }
+        uexWeiXin.cbGetAccessToken = function(opCode,dataType,data){
+           alert("cbGetAccessToken："+data);
+        }
+        uexWeiXin.cbGetAccessTokenLocal = function(opCode,dataType,data){
+           alert("cbGetAccessTokenLocal:"+data);
+        }
+        
+        uexWindow.onStateChange=function(state){
+                if(state == 0){
+                    var params = {
+                        windowName:"root"
+                    };
+                    uexWeiXin.setCallbackWindowName(JSON.stringify(params));
+                }
+        }
     }
+
+    /*---------------微信分享--------------*/
+    
+    //旧接口
+   	function shareText(){
+       var txt = "这是来自AppCan平台对微信支持测试";
+       var type = document.getElementById("type").value;
+       uexWeiXin.sendTextContent(type, txt);
+   	}
+   	function sharePic(){
+        var thumImgPath = "res://appcan.png";
+        var realImgPath = "res://appcan.png";
+        var txt = "这是来自AppCan平台对微信支持测试";
+        var type = document.getElementById("type").value;
+        uexWeiXin.sendImageContent(type, thumImgPath, realImgPath,"","","");
+    } 
+   	
+   	//新接口
+   	function shareTextContent(){
+       var type = document.getElementById("type").value;
+       var jsonstr = '{"text":"这是来自AppCan平台对微信支持测试","scene":"'+type+'"}';
+       uexWeiXin.shareTextContent(jsonstr);
+   	}
+   	function shareImageContent(){
+        var type = document.getElementById("type").value;
+        var jsonstr = '{"thumbImg":"res://appcan.png","image":"res://appcan.png","scene":"'+type+'"}';
+        uexWeiXin.shareImageContent(jsonstr);
+    } 
+   	function shareLinkContent(){
+        var type = document.getElementById("type").value;
+        var jsonstr = '{"thumbImg":"res://icon.png","wedpageUrl":"http://www.appcan.cn","scene":"'+type+'","title":"你好,我是AppCan","description":"中国最大的移动中间键平台AppCan对微信分享的图片支持测试"}';
+        uexWeiXin.shareLinkContent(jsonstr);
+    } 
+   	
+    /*-----------微信登录---------*/
+    
     var code = "";
     var refreshToken = "";
     var openid = "";
     var accessToken = "";
-    function loginMsg(){
+    
+    //旧接口
+    function weiXinLogin(){
+        uexWeiXin.weiXinLogin('snsapi_userinfo,snsapi_base','0744');
+    }
+    function getWeiXinLoginAccessToken(){
+        uexWeiXin.getWeiXinLoginAccessToken('db426a9829e4b49a0dcac7b4162da6b6','authorization_code');
+    }
+    function getWeiXinLoginUnionID(){
+        uexWeiXin.getWeiXinLoginUnionID(accessToken,openid);
+    }
+    function getWeiXinLoginRefreshAccessToken(){
+        uexWeiXin.getWeiXinLoginRefreshAccessToken('refresh_token',refreshToken);
+    }
+    function getWeiXinLoginCheckAccessToken(){
+        uexWeiXin.getWeiXinLoginCheckAccessToken(accessToken,openid);
+    }
+    //新接口
+    function login(){
         var params = {
             scope:"snsapi_userinfo,snsapi_base",
             state:"0902"
@@ -123,7 +172,6 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
         var data = JSON.stringify(params);
         uexWeiXin.login(data);
     }
-
     function getLoginAccessToken(){
         var params = {
             secret:app_serect,
@@ -133,7 +181,6 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
         var data = JSON.stringify(params);
         uexWeiXin.getLoginAccessToken(data);
     }
-
     function getLoginRefreshAccessToken(){
         var params = {
             grant_type:"refresh_token",
@@ -142,7 +189,6 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
         var data = JSON.stringify(params);
         uexWeiXin.getLoginRefreshAccessToken(data);
     }
-
     function getLoginCheckAccessToken(){
         var params = {
             access_token:accessToken,
@@ -151,7 +197,6 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
         var data = JSON.stringify(params);
         uexWeiXin.getLoginCheckAccessToken(data);
     }
-
     function getLoginUnionID(){
         var params = {
             access_token:accessToken,
@@ -160,37 +205,35 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
         var data = JSON.stringify(params);
         uexWeiXin.getLoginUnionID(data);
     }
-
-   //分享文本，支持分享到朋友圈与用户好友
-   function shareText(){
-       var txt = "这是来自AppCan平台对微信支持测试";
-       var type = document.getElementById("type").value;
-       uexWeiXin.sendTextContent(type, txt);
-   }
-   //分享图片，支持分享到朋友圈与用户好友
-   function sharePic(){
-        var thumImgPath = "res://appcan.png";
-        var realImgPath = "res://appcan.png";
-        var txt = "这是来自AppCan平台对微信支持测试";
-        //分享场景 0：对话  1：朋友圈
-        var type = document.getElementById("type").value;
-        uexWeiXin.sendImageContent(type, thumImgPath, realImgPath,"","","");
-    } 
-   function shareTextContent(){
-       var type = document.getElementById("type").value;
-       var jsonstr = '{"text":"这是来自AppCan平台对微信支持测试","scene":"'+type+'"}';
-       uexWeiXin.shareTextContent(jsonstr);
-   }
-   function shareImageContent(){
-        var type = document.getElementById("type").value;
-        var jsonstr = '{"thumbImg":"res://appcan.png","image":"res://appcan.png","scene":"'+type+'"}';
-        uexWeiXin.shareImageContent(jsonstr);
-    } 
-   function shareLinkContent(){
-        var type = document.getElementById("type").value;
-        var jsonstr = '{"thumbImg":"res://icon.png","wedpageUrl":"http://www.appcan.cn","scene":"'+type+'","title":"你好,我是AppCan","description":"中国最大的移动中间键平台AppCan对微信分享的图片支持测试"}';
-        uexWeiXin.shareLinkContent(jsonstr);
-    } 
+    //新接口的回调
+    function cbLogin(info){
+        alert("------cbLogin------\n" + info);
+        var data = JSON.parse(info);
+        code = data.code;
+    }
+    function cbGetLoginAccessToken(info){
+        alert("------cbGetLoginAccessToken------\n" + info);
+        var data = JSON.parse(info);
+        accessToken = data.access_token;
+        openid = data.openid;
+        refreshToken = data.refresh_token;
+    }
+    function cbGetLoginRefreshAccessToken(info){
+        alert("------cbGetLoginRefreshAccessToken------\n" + info);
+        var data = JSON.parse(info);
+        accessToken = data.access_token;
+        openid = data.openid;
+        refreshToken = data.refresh_token;
+    }
+    function cbGetLoginCheckAccessToken(info){
+        alert("------cbGetLoginCheckAccessToken------\n" + info);
+    }
+    function cbGetLoginUnionID(info){
+        alert("------cbGetLoginUnionID------\n" + info);
+    }
+    
+   	/*-----------------微信支付---------------*/
+   	
     function getAccessToken(){
         uexWeiXin.getAccessToken(appId,app_serect); 
     }        
@@ -207,55 +250,14 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
     function registerApp(){
         uexWeiXin.registerApp(appId);
     }
-    function weixinLogin(){
-        uexWeiXin.weiXinLogin('snsapi_userinfo,snsapi_base','0744');
-    }
-
-    function getWeiXinLoginAccessToken(){
-        uexWeiXin.getWeiXinLoginAccessToken('db426a9829e4b49a0dcac7b4162da6b6','authorization_code');
-    }
-    function getWeiXinLoginUnionID(){
-        uexWeiXin.getWeiXinLoginUnionID(access_token,openid);
-    }
-    function getWeiXinLoginRefreshAccessToken(){
-        uexWeiXin.getWeiXinLoginRefreshAccessToken('refresh_token',refresh_token);
-    }
-    function getWeiXinLoginCheckAccessToken(){
-        uexWeiXin.getWeiXinLoginCheckAccessToken(access_token,openid);
-    }
     function openNewWin(){
         uexWindow.open('pay', '0', "index.html", '2', '', '', 4);
+        var params = {
+             windowName:"pay"
+        };
+        uexWeiXin.setCallbackWindowName(JSON.stringify(params));
     }
-
-    function cbLogin(info){
-        alert(info);
-        var data = JSON.parse(info);
-        code = data.code;
-    }
-
-    function cbGetLoginAccessToken(info){
-        alert(info);
-        var data = JSON.parse(info);
-        accessToken = data.access_token;
-        openid = data.openid;
-        refreshToken = data.refresh_token;
-    }
-
-    function cbGetLoginRefreshAccessToken(info){
-        alert(info);
-        var data = JSON.parse(info);
-        accessToken = data.access_token;
-        openid = data.openid;
-        refreshToken = data.refresh_token;
-    }
-
-    function cbGetLoginCheckAccessToken(info){
-        alert(info);
-    }
-
-    function cbGetLoginUnionID(info){
-        alert(info);
-    }
+    
 </script>
 </head>
 
@@ -274,22 +276,29 @@ var packageValue = "bank_type=WX&body=%E5%8D%83%E8%B6%B3%E9%87%91%E7%AE%8D%E6%A3
             <input class="btn" type="button" value="分享文本" onclick="shareTextContent();">
             <input class="btn" type="button" value="分享图片" onclick="shareImageContent();">
             <input class="btn" type="button" value="分享链接" onclick="shareLinkContent();">
-            <span>登陆接口相关</span>
-            <input class="btn" type="button" value="登陆" onClick="weixinLogin()">
+            <span>---------微信登录-----------</span>
+            <span>旧接口</span>
+            <span>weiXinLogin</span>
+            <input class="btn" type="button" value="登录" onClick="weiXinLogin()">
+            <span>getWeiXinLoginAccessToken</span>
             <input class="btn" type="button" value="获取accessToken" onClick="getWeiXinLoginAccessToken()">
+            <span>getWeiXinLoginUnionID</span>
             <input class="btn" type="button" value="获取个人信息" onClick="getWeiXinLoginUnionID()">
+            <span>getWeiXinLoginRefreshAccessToken</span>
             <input class="btn" type="button" value="获取刷新token" onClick="getWeiXinLoginRefreshAccessToken()">
-            <input class="btn" type="button" value="检验accessToken" onClick="getWeiXinLoginCheckAccessToken()">
-            <br><br><br>
-            <input class='btn' type='button' value='login' onclick='loginMsg()'>
-
-            <input class='btn' type='button' value='getLoginAccessToken' onclick='getLoginAccessToken()'>
-
-            <input class='btn' type='button' value='getLoginRefreshAccessToken' onclick='getLoginRefreshAccessToken()'>
-
-            <input class='btn' type='button' value='getLoginCheckAccessToken' onclick='getLoginCheckAccessToken()'>
-
-            <input class='btn' type='button' value='getLoginUnionID' onclick='getLoginUnionID()'>
+            <span>getWeiXinLoginCheckAccessToken</span>
+            <input class="btn" type="button" value="检验accessToken" onClick="getWeiXinLoginCheckAccessToken()"><br/>
+            <span>新接口</span>
+            <span>login</span>
+            <input class='btn' type='button' value='登录' onclick='login()'>
+            <span>getLoginAccessToken</span>
+            <input class='btn' type='button' value='获取accessToken' onclick='getLoginAccessToken()'>
+            <span>getLoginRefreshAccessToken</span>
+            <input class='btn' type='button' value='获取刷新token' onclick='getLoginRefreshAccessToken()'>
+            <span>getLoginCheckAccessToken</span>
+            <input class='btn' type='button' value='检验accessToken' onclick='getLoginCheckAccessToken()'>
+            <span>getLoginUnionID</span>
+            <input class='btn' type='button' value='获取个人信息' onclick='getLoginUnionID()'>
 
             <span>5.当前手机安装的微信版本是否支持微信支付</span>
             <span>返回0支持，1版本太低不支持</span>

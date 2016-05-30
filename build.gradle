@@ -7,14 +7,14 @@ dependencies {
 android {
     signingConfigs {
         config {
-            keyAlias 'lecao'
-            keyPassword '1234561'
-            storeFile file('E:/djf/work/workspace/Problems/20150506-微信sdk升级/微信资料/微信资料/lecao.keystore')
-            storePassword '1234561'
+            keyAlias 'appcandevelop'
+            keyPassword '3g2win.com'
+            storeFile file('AppcanDevelop.keystore')
+            storePassword '3g2win.com'
         }
     }
-    compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    compileSdkVersion 22
+    buildToolsVersion "23.0.0"
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
