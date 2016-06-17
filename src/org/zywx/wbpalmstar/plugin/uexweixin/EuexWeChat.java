@@ -1477,7 +1477,7 @@ public class EuexWeChat extends EUExBase {
     private void getLoginCheckAccessTokenMsg(String[] params) {
         String json = params[0];
         if(params.length == 2) {
-            getLoginCheckAccessTokenFunId = params[2];
+            getLoginCheckAccessTokenFunId = params[1];
         }
         try {
         	LoginCheckTokenVO dataVO = DataHelper.gson.fromJson(json, LoginCheckTokenVO.class);
