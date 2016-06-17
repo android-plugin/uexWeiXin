@@ -59,7 +59,7 @@ import java.util.Random;
 public class EuexWeChat extends EUExBase {
 
 	private static final String TAG = "EuexWeChat";
-	
+
 	public final static String PARAMS_JSON_KEY_TEXT = "text";
 	public final static String PARAMS_JSON_KEY_SCENE = "scene";
 	public final static String PARAMS_JSON_KEY_THUMBIMG = "thumbImg";
@@ -119,6 +119,22 @@ public class EuexWeChat extends EUExBase {
     private static int code;
     private static String mWindowName = null;
 
+    //分享text的回调函数
+    public String shareTextFunId;
+    //分享图片的回调函数
+    private String shareImageFunId;
+    private String shareLinkFunId;
+    private String loginFunId;
+    private String getLoginAccessTokenFunId;
+    private String getLoginRefreshAccessTokenFunId;
+    private String getLoginCheckAccessTokenFunId;
+    private String getLoginUnionIDFuncId;
+    private String getPrepayIdFuncId;
+    private String startPayFuncId;
+    private String getAccessTokenFunId;
+    private String getAccessTokenLocalFunId;
+
+
 	public EuexWeChat(Context context, EBrowserView parent) {
 		super(context, parent);
 		init();
@@ -151,7 +167,17 @@ public class EuexWeChat extends EUExBase {
                         getJson(msg.errCode + "", msg.errStr));
                 callBackPluginJsAsync(JsConst.CALLBACK_START_PAY,
                         getJson(msg.errCode + "", msg.errStr));
-			}
+                if(null != startPayFuncId) {
+                    try {
+                        JSONObject obj = new JSONObject();
+                        obj.put("errCode", msg.errCode);
+                        obj.put("errStr", msg.errStr);
+                        callbackToJs(Integer.parseInt(startPayFuncId), false, msg.errStr);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
 
 			@Override
 			public void callBackShareResult(int message) {
@@ -163,15 +189,27 @@ public class EuexWeChat extends EUExBase {
 				} else if (code == 2) {// 类型代表是图片类型
                     callbackOldInterface(CB_SEND_IMAGE_CONTENT, 0,
                             EUExCallback.F_C_INT, message == 0 ? "0" : "1");
+                    if(null != shareImageFunId) {
+                        callbackToJs(Integer.parseInt(shareImageFunId), false, message == 0 ? "0" : "1");
+                    }
 				} else if (code == SHARE_TEXT_CONTENT_CODE) {
 					shareCallBack(CB_SHARE_TEXT_CONTENT, message == 0 ? "0"
 							: "1");
-				} else if (code == SHARE_IMAGE_CONTENT_CODE) {
+                    if (null != shareTextFunId) {
+                        callbackToJs(Integer.parseInt(shareTextFunId), false, message == 0 ? "0" : "1");
+                    }
+                } else if (code == SHARE_IMAGE_CONTENT_CODE) {
 					shareCallBack(CB_SHARE_IMAGE_CONTENT, message == 0 ? "0"
 							: "1");
+                    if(null != shareImageFunId) {
+                        callbackToJs(Integer.parseInt(shareImageFunId), false, message == 0 ? "0" : "1");
+                    }
 				} else if (code == SHARE_LINK_CONTENT_CODE) {
 					shareCallBack(CB_SHARE_LINK_CONTENT, message == 0 ? "0"
 							: "1");
+                    if (null != shareLinkFunId) {
+                        callbackToJs(Integer.parseInt(shareLinkFunId), false, message == 0 ? "0" : "1");
+                    }
 				}
 			}
 
@@ -194,6 +232,13 @@ public class EuexWeChat extends EUExBase {
                         resultVO.setCountry(resp.country);
                         String resultStr = DataHelper.gson.toJson(resultVO);
                         shareCallBack(JsConst.CALLBACK_LOGIN, resultStr);
+                        if (null != loginFunId) {
+                            try {
+                                callbackToJs(Integer.parseInt(loginFunId), false, new JSONObject(resultStr));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
                     isLoginNew = false;
                 }else{
@@ -206,19 +251,18 @@ public class EuexWeChat extends EUExBase {
 
 	/**
 	 * 注册应用到微信
-	 * 
+	 *
 	 * @param appId
 	 *            从微信开放平台申请的appId
 	 * @return true 注册成功， false 注册失败
 	 */
-	public boolean registerApp(String[] data) {
-		Log.d(TAG, "registerApp");
+	public int registerApp(String[] data) {
 		if (data == null || data.length < 1) {
-			return false;
+			return EUExCallback.F_C_FAILED;
 		}
 		appId = data[0];
 		if (appId == null || appId.length() == 0) {
-			return false;
+			return EUExCallback.F_C_FAILED;
 		}
 		api = WXAPIFactory.createWXAPI(mContext, appId, false);
 		boolean regOk = api.registerApp(appId);
@@ -227,7 +271,7 @@ public class EuexWeChat extends EUExBase {
 		}
 		jsCallback(CB_REGISTER_WXAPP_RESULT, 0, EUExCallback.F_C_INT, regOk ? 0
 				: 1);// 注册回调 0-成功 1-失败
-		return regOk;
+		return regOk ? 0 : 1;
 	}
 
 	// 微信登陆接口
@@ -261,7 +305,6 @@ public class EuexWeChat extends EUExBase {
 			String url = String
 					.format(JsConst.URL_LOGIN_GET_ACCESS_TOKEN,
 							appId, secret, accessCode, grant_type);
-			Log.i("EuexWeChat", "url=====>" + url);
 			NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
 			token.execute(url);
 		} catch (Exception e) {
@@ -274,7 +317,6 @@ public class EuexWeChat extends EUExBase {
 
 	// 微信登陆获取refreshToken
 	public void getWeiXinLoginRefreshAccessToken(String[] parms) {
-		Log.d(TAG, "weiXinLogin");
 		if (parms.length < 2) {
 			return;
 		}
@@ -286,7 +328,6 @@ public class EuexWeChat extends EUExBase {
 			String url = String
 					.format(JsConst.URL_LOGIN_REFRESH_ACCESS_TOKEN,
 							appId, grant_type, refresh_token);
-			Log.i("EuexWeChat", "url=====>" + url);
 			NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
 			token.execute(url);
 		} catch (Exception e) {
@@ -310,7 +351,6 @@ public class EuexWeChat extends EUExBase {
 			String url = String
 					.format(JsConst.URL_LOGIN_CHECK_ACCESS_TOKEN,
 							access_token, openid);
-			Log.i("EuexWeChat", "url=====>" + url);
 			NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
 			token.execute(url);
 		} catch (Exception e) {
@@ -323,7 +363,6 @@ public class EuexWeChat extends EUExBase {
 
 	// 获取个人信息
 	public void getWeiXinLoginUnionID(String[] parms) {
-		Log.d(TAG, "weiXinLogin");
 		if (parms.length < 2) {
 			return;
 		}
@@ -335,7 +374,6 @@ public class EuexWeChat extends EUExBase {
 			String url = String
 					.format(JsConst.URL_LOGIN_UNIONID,
 							access_token, openid);
-			Log.i("EuexWeChat", "url=====>" + url);
 			NetWorkAsyncTaskToken token = new NetWorkAsyncTaskToken();
 			token.execute(url);
 
@@ -351,7 +389,6 @@ public class EuexWeChat extends EUExBase {
 		@Override
 		protected String doInBackground(String... params) {
 			String url = params[0];
-            Log.i("EuexWeChat", "url->" + url);
 			byte[] buf = Utils.httpGet(url);
 			String callBack = new String(buf);
 			return callBack;
@@ -360,20 +397,47 @@ public class EuexWeChat extends EUExBase {
 		@Override
 		protected void onPostExecute(String result) {
 			super.onPostExecute(result);
-			Log.i("countCode", "countCode=====>" + countCode);
             if (isLoginNew){
                 switch (countCode){
                     case Constants.token:
                         callBackPluginJs(JsConst.CALLBACK_GET_LOGIN_ACCESS_TOKEN, result);
+                        if(getLoginAccessTokenFunId != null) {
+                            try {
+                                callbackToJs(Integer.parseInt(getLoginAccessTokenFunId), false, new JSONObject(result));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
                         break;
                     case Constants.refresh:
                         callBackPluginJs(JsConst.CALLBACK_GET_LOGIN_REFRESH_ACCESS_TOKEN, result);
+                        if(getLoginRefreshAccessTokenFunId != null) {
+                            try {
+                                callbackToJs(Integer.parseInt(getLoginRefreshAccessTokenFunId), false, new JSONObject(result));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
                         break;
                     case Constants.check:
                         callBackPluginJs(JsConst.CALLBACK_GET_LOGIN_CHECK_ACCESS_TOKEN, result);
+                        if(getLoginCheckAccessTokenFunId != null) {
+                            try {
+                                callbackToJs(Integer.parseInt(getLoginCheckAccessTokenFunId), false, new JSONObject(result));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
                         break;
                     case Constants.union:
                         callBackPluginJs(JsConst.CALLBACK_GET_LOGIN_UNION_I_D, result);
+                        if(getLoginUnionIDFuncId != null) {
+                            try {
+                                callbackToJs(Integer.parseInt(getLoginUnionIDFuncId), false, new JSONObject(result));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
                         break;
                     default:
                         break;
@@ -381,11 +445,9 @@ public class EuexWeChat extends EUExBase {
                 isLoginNew = false;
             }else{
                 if (countCode == 1) {
-                    Log.i("EuexWeChat", "result=====>" + result);
                     jsCallback(CB_GETWEIXINLOGINACCESSTOKEN, 0,
                             EUExCallback.F_C_JSON, result);
                 } else if (countCode == 2) {
-                    Log.i("EuexWeChat", "result=====>" + result);
                     jsCallback(CB_GETWEIXINLOGINREFRESHACCESSTOKEN, 0,
                             EUExCallback.F_C_JSON, result);
                 } else if (countCode == 3) {
@@ -397,8 +459,6 @@ public class EuexWeChat extends EUExBase {
                     } else {
                         re = "0";
                     }
-                    Log.i("CheckModel", "re=====>"+re);
-
                     jsCallback(CB_GETWEIXINLOGINCHECKACCESSTOKEN, 0,
                             EUExCallback.F_C_JSON, re);
                 } else if (countCode == 4) {
@@ -411,7 +471,6 @@ public class EuexWeChat extends EUExBase {
 	}
 
 	public boolean sendTextContent(String[] params) {
-		Log.d(TAG, "sendTextContent");
 		if (params == null || params.length < 2) {
 			return false;
 		}
@@ -429,7 +488,6 @@ public class EuexWeChat extends EUExBase {
 	}
 
 	public boolean sendImageContent(String[] params) {
-		Log.d(TAG, "sendImageContent");
 		if (params == null || params.length < 3) {
 			return false;
 		}
@@ -453,11 +511,10 @@ public class EuexWeChat extends EUExBase {
 
 	/**
 	 * 判断是否安装微信应用，
-	 * 
+	 *
 	 * @return true 已安装， false 未安装
 	 */
 	public boolean isWXAppInstalled(String[] args) {
-		Log.d(TAG, "isWXAppInstalled");
 		// 判断是否安装微信，安装返回true。
 		boolean isWXInstalled = api.isWXAppInstalled();
 		jsCallback(CB_IS_WXAPP_INSTALLIED, 0, EUExCallback.F_C_TEXT,
@@ -466,7 +523,7 @@ public class EuexWeChat extends EUExBase {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param scene
 	 * @param text
 	 * @return
@@ -493,7 +550,7 @@ public class EuexWeChat extends EUExBase {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param scene
 	 *            发送场景，0 微信， 1 朋友圈
 	 * @param thumImgPath
@@ -552,19 +609,23 @@ public class EuexWeChat extends EUExBase {
 				: type + System.currentTimeMillis();
 	}
 
-	public void isSupportPay(String[] params) {
+	public int isSupportPay(String[] params) {
 		// getWXAppSupportSAPI是否支持微信版本。
 		boolean isPaySupported = api.getWXAppSupportAPI() >= Build.PAY_SUPPORTED_SDK_INT;
-		// isPaySupported判断是否支持已安装的微信版本。
-		if (isPaySupported) {
-			jsCallback(CB_IS_PAY_SUPPORTED, 0, EUExCallback.F_C_INT, 0);
-		} else {
-			jsCallback(CB_IS_PAY_SUPPORTED, 0, EUExCallback.F_C_INT, 1);
-		}
-	}
+        int result = isPaySupported ? 0 : 1;
+        jsCallback(CB_IS_PAY_SUPPORTED, 0, EUExCallback.F_C_INT, result);
+        return result;
+    }
 
 	public void getAccessToken(String[] params) {
-		new GetAccessTokenTask(params[0], params[1]).execute();
+        if (params != null && params.length < 2) {
+            errorCallback(0, 0, "error params!");
+            return;
+        }
+        if (params.length == 3) {
+            getAccessTokenFunId = params[3];
+        }
+        new GetAccessTokenTask(params[0], params[1]).execute();
 	}
 
 	String contentAccess = "";
@@ -629,7 +690,10 @@ public class EuexWeChat extends EUExBase {
 
 	// 获取本地存储的Token数据。
 	public void getAccessTokenLocal(String[] params) {
-		setCallBackData();
+        if (null != params && params.length == 1) {
+            getAccessTokenLocalFunId = params[0];
+        }
+        setCallBackData();
 	}
 
 	String contentAccessLocal = "";
@@ -638,11 +702,17 @@ public class EuexWeChat extends EUExBase {
 		if (getLocalData().localRetCode == LocalRetCode.ERR_OK) {
 			jsCallback(CB_GET_ACCESS_TOKEN_LOCAL, 0, EUExCallback.F_C_TEXT,
 					contentAccessLocal);
-
+            if (null != getAccessTokenLocalFunId) {
+                callbackToJs(Integer.parseInt(getAccessTokenFunId), false, contentAccessLocal);
+            }
 		} else {
+
 			jsCallback(CB_GET_ACCESS_TOKEN_LOCAL, 0, EUExCallback.F_C_TEXT,
 					getLocalData().localRetCode.name());
-		}
+            if (null != getAccessTokenLocalFunId) {
+                callbackToJs(Integer.parseInt(getAccessTokenFunId), false, getLocalData().localRetCode.name());
+            }
+        }
 	}
 
 	public GetAccessTokenResult getLocalData() {
@@ -725,10 +795,16 @@ public class EuexWeChat extends EUExBase {
 			if (result.localRetCode == LocalRetCode.ERR_OK) {
 				jsCallback(CB_GET_PREPAY_ID, 0, EUExCallback.F_C_TEXT,
 						jsonPrepayData);
+                if (null != getAccessTokenFunId) {
+                    callbackToJs(Integer.parseInt(getAccessTokenFunId), false, contentAccess);
+                }
 			} else {
 				jsCallback(CB_GET_PREPAY_ID, 0, EUExCallback.F_C_TEXT,
 						result.localRetCode.name());
-			}
+                if (null != getAccessTokenFunId) {
+                    callbackToJs(Integer.parseInt(getAccessTokenFunId), false, result.localRetCode.name());
+                }
+            }
 		}
 
 		@Override
@@ -767,10 +843,10 @@ public class EuexWeChat extends EUExBase {
 
     private class GeneratePrepayID extends
             AsyncTask<Void, Void, GetPrepayIdResult> {
-        
+
         private ProgressDialog dialog;
         private String accessToken, appKey, packageValue, traceId;
-        
+
         public GeneratePrepayID(String[] params) {
             this.accessToken = params[0];
             this.appKey = params[1];
@@ -780,18 +856,18 @@ public class EuexWeChat extends EUExBase {
                 this.traceId = params[3];
             }
         }
-        
+
         @Override
         protected void onPreExecute() {
             dialog = ProgressDialog.show(mContext, "提示", "正在获取预支付订单...");
         }
-        
+
         @Override
         protected void onPostExecute(GetPrepayIdResult result) {
             if (dialog != null) {
                 dialog.dismiss();
             }
-        
+
             if (result.localRetCode == LocalRetCode.ERR_OK) {
                 jsCallback(CB_GET_PREPAY_ID, 0, EUExCallback.F_C_TEXT,
                         jsonPrepayData);
@@ -800,27 +876,27 @@ public class EuexWeChat extends EUExBase {
                         result.localRetCode.name());
             }
         }
-        
+
         @Override
         protected void onCancelled() {
             super.onCancelled();
         }
-        
+
         @Override
         protected GetPrepayIdResult doInBackground(Void... params) {
-        
+
             String url = String.format(
                     "https://api.weixin.qq.com/pay/genprepay?access_token=%s",
                     accessToken);
-        
+
             Log.d(TAG, "doInBackground, url = " + url);
             String entity = genProductArgs(appKey, packageValue, traceId);
             GetPrepayIdResult result = new GetPrepayIdResult();
-        
+
             byte[] buf = Utils.httpPost(url, entity);
-        
+
             // ****************************************
-        
+
             if (buf == null || buf.length == 0) {
                 result.localRetCode = LocalRetCode.ERR_HTTP;
                 return result;
@@ -836,18 +912,18 @@ public class EuexWeChat extends EUExBase {
 
     private String genProductArgs(String appKey, String packageValue, String traceId) {
         JSONObject json = new JSONObject();
-        
+
         try {
             json.put("appid", appId);
             if(!TextUtils.isEmpty(traceId)){
-                json.put("traceid", traceId); 
+                json.put("traceid", traceId);
             }
             nonceStr = genNonceStr();
             json.put("noncestr", nonceStr);
             json.put("package", packageValue);
             timeStamp = genTimeStamp();
             json.put("timestamp", timeStamp);
-            
+
             List<NameValuePair> signParams = new LinkedList<NameValuePair>();
             signParams.add(new BasicNameValuePair("appid", appId));
             signParams.add(new BasicNameValuePair("appkey", appKey));
@@ -856,14 +932,14 @@ public class EuexWeChat extends EUExBase {
             signParams.add(new BasicNameValuePair("timestamp", String.valueOf(timeStamp)));
             signParams.add(new BasicNameValuePair("traceid", traceId));
             json.put("app_signature", genSign(signParams));
-            
+
             json.put("sign_method", "sha1");
         } catch (Exception e) {
             Log.e(TAG, "genProductArgs fail, ex = " + e.getMessage());
             e.printStackTrace();
             return null;
         }
-        
+
         return json.toString();
     }
 
@@ -875,7 +951,7 @@ public class EuexWeChat extends EUExBase {
         req.nonceStr = nonceStr;
         req.timeStamp = String.valueOf(timeStamp);
         req.packageValue = "Sign=" + params[3];
-        
+
         List<NameValuePair> signParams = new LinkedList<NameValuePair>();
         signParams.add(new BasicNameValuePair("appid", req.appId));
         signParams.add(new BasicNameValuePair("appkey", params[2]));
@@ -888,8 +964,8 @@ public class EuexWeChat extends EUExBase {
 
         // 在支付之前，如果应用没有注册到微信，应该先调用IWXMsg.registerApp将应用注册到微信
         api.sendReq(req);
-    }  
-    
+    }
+
 	public void gotoPay(String[] params) {
 	    PayReq req = new PayReq();
 		req.appId = Utils.getAppId(mContext);
@@ -982,8 +1058,10 @@ public class EuexWeChat extends EUExBase {
 	}
 
 	public boolean shareTextContent(String[] params) {
-		Log.d(TAG, "shareText");
 		code = SHARE_TEXT_CONTENT_CODE;
+        if (params.length == 2) {
+            shareTextFunId = params[1];
+        }
 		try {
 			JSONObject jsonObject = new JSONObject(params[0]);
 			int scene = jsonObject.getInt(PARAMS_JSON_KEY_SCENE);
@@ -998,7 +1076,13 @@ public class EuexWeChat extends EUExBase {
 	}
 
 	public boolean shareImageContent(String[] params) {
-		Log.d(TAG, "shareImage");
+        if (params == null || params.length < 1) {
+            errorCallback(0, 0, "error params!");
+            return false;
+        }
+        if (params.length == 2) {
+            shareImageFunId = params[1];
+        }
 		code = SHARE_IMAGE_CONTENT_CODE;
 		try {
 			JSONObject jsonObject = new JSONObject(params[0]);
@@ -1015,7 +1099,7 @@ public class EuexWeChat extends EUExBase {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param scene
 	 *            发送场景，0 微信， 1 朋友圈
 	 * @param thumImgPath
@@ -1058,7 +1142,13 @@ public class EuexWeChat extends EUExBase {
 	}
 
 	public boolean shareLinkContent(String[] params) {
-		Log.d(TAG, "shareLink");
+        if (params == null || params.length < 1) {
+            errorCallback(0, 0, "error params!");
+            return false;
+        }
+        if (params.length == 2) {
+            shareLinkFunId = params[1];
+        }
 		code = SHARE_LINK_CONTENT_CODE;
 		try {
 			JSONObject jsonObject = new JSONObject(params[0]);
@@ -1077,7 +1167,7 @@ public class EuexWeChat extends EUExBase {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param scene
 	 *            发送场景，0 微信， 1 朋友圈
 	 * @param thumImgPath
@@ -1182,7 +1272,7 @@ public class EuexWeChat extends EUExBase {
 		}
 		Bitmap thumbBmp = Bitmap.createScaledBitmap(bmp, THUMB_SIZE,
 				THUMB_SIZE, true);
-			
+
 		if (bmp != null && bmp != thumbBmp) {
 			bmp.recycle();
 		}
@@ -1206,7 +1296,10 @@ public class EuexWeChat extends EUExBase {
     private void getPrepayIdMsg(String[] params) {
         try {
 			String json = params[0];
-			PrePayDataVO dataVO = DataHelper.gson.fromJson(json, PrePayDataVO.class);
+            if (params.length == 2) {
+                getPrepayIdFuncId = params[1];
+            }
+            PrePayDataVO dataVO = DataHelper.gson.fromJson(json, PrePayDataVO.class);
 			WXPayGetPrepayIdTask task = new WXPayGetPrepayIdTask(mContext, dataVO, listener);
 			task.getPrepayId();
 		} catch (Exception e) {
@@ -1232,6 +1325,9 @@ public class EuexWeChat extends EUExBase {
 
     private void startPayMsg(String[] params) {
         String json = params[0];
+        if (params.length == 2) {
+            startPayFuncId = params[1];
+        }
         try {
         	PayDataVO dataVO = DataHelper.gson.fromJson(json, PayDataVO.class);
             JSONObject jsonObject = new JSONObject(json);
@@ -1248,6 +1344,9 @@ public class EuexWeChat extends EUExBase {
         if (params == null || params.length < 1) {
             errorCallback(0, 0, "error params!");
             return;
+        }
+        if (params.length == 2) {
+            loginFunId = params[1];
         }
         Message msg = new Message();
         msg.obj = this;
@@ -1295,8 +1394,10 @@ public class EuexWeChat extends EUExBase {
     }
 
     private void getLoginAccessTokenMsg(String[] params) {
-        Log.i("EuexWeChat", "getLoginAccessTokenMsg->" + Arrays.toString(params));
         String json = params[0];
+        if (params.length == 2) {
+            getLoginAccessTokenFunId = params[1];
+        }
         if (TextUtils.isEmpty(appId)){
             errorCallback(0, 0, "please register first!");
             return;
@@ -1334,11 +1435,13 @@ public class EuexWeChat extends EUExBase {
     }
 
     private void getLoginRefreshAccessTokenMsg(String[] params) {
-        Log.i("EuexWeChat", "getLoginRefreshAccessTokenMsg->" + Arrays.toString(params));
         String json = params[0];
         if (TextUtils.isEmpty(appId)){
             errorCallback(0, 0, "please register first!");
             return;
+        }
+        if (params.length == 2) {
+            getLoginRefreshAccessTokenFunId = params[1];
         }
         try {
         	LoginRefreshTokenVO dataVO = DataHelper.gson.fromJson(json, LoginRefreshTokenVO.class);
@@ -1372,8 +1475,10 @@ public class EuexWeChat extends EUExBase {
     }
 
     private void getLoginCheckAccessTokenMsg(String[] params) {
-        Log.i("EuexWeChat", "getLoginCheckAccessTokenMsg->" + Arrays.toString(params));
         String json = params[0];
+        if(params.length == 2) {
+            getLoginCheckAccessTokenFunId = params[2];
+        }
         try {
         	LoginCheckTokenVO dataVO = DataHelper.gson.fromJson(json, LoginCheckTokenVO.class);
         	isLoginNew = true;
@@ -1405,8 +1510,10 @@ public class EuexWeChat extends EUExBase {
     }
 
     private void getLoginUnionIDMsg(String[] params) {
-        Log.i("EuexWeChat", "getLoginUnionIDMsg->" + Arrays.toString(params));
         String json = params[0];
+        if (params.length == 2) {
+            getLoginUnionIDFuncId = params[1];
+        }
         try {
         	LoginCheckTokenVO dataVO = DataHelper.gson.fromJson(json, LoginCheckTokenVO.class);
         	isLoginNew = true;
@@ -1425,7 +1532,7 @@ public class EuexWeChat extends EUExBase {
 
     public void setCallbackWindowName(String[] params){
         try {
-			if (params == null || params.length < 1) 
+			if (params == null || params.length < 1)
 				return;
 			CallbackWindowNameVO dataVO = DataHelper.gson.fromJson(params[0],
 			        CallbackWindowNameVO.class);
@@ -1502,13 +1609,16 @@ public class EuexWeChat extends EUExBase {
     }
     OnPayResultListener listener = new OnPayResultListener() {
         @Override
-        public void onGetPrepayResult(String json) {
-            callBackPluginJs(JsConst.CALLBACK_GET_PREPAY_ID, json);
+        public void onGetPrepayResult(JSONObject json) {
+            callBackPluginJs(JsConst.CALLBACK_GET_PREPAY_ID, json.toString());
+            if (null != getPrepayIdFuncId) {
+                callbackToJs(Integer.parseInt(getPrepayIdFuncId), false, json);
+            }
         }
     };
 
     public interface OnPayResultListener{
-        public void onGetPrepayResult(String jsonData);
+        public void onGetPrepayResult(JSONObject jsonData);
     }
 
 

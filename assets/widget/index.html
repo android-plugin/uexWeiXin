@@ -31,7 +31,9 @@
             sign:"748F903B8E3F2C0B2CC6B287B9A28078"//(必选)
         };
         var data = JSON.stringify(params);
-        uexWeiXin.getPrepayId(data);
+        uexWeiXin.getPrepayId(data, function(data) {
+             alert(JSON.stringify(data));
+        });
     }
 
     function startPay(){
@@ -45,7 +47,9 @@
             sign:"137AE3E0FA57EF7401774049DFE999EE"//(必选)
         };
         var data = JSON.stringify(params);
-        uexWeiXin.startPay(data);
+        uexWeiXin.startPay(data, function(data) {
+             alert(JSON.stringify(data));
+        });
     }
 
 

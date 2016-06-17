@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexWeiXin" version="3.1.34" build = "34">
-        <info>34:支持https</info>
+    <plugin uexName="uexWeiXin" version="4.0.0" build = "35">
+        <info>35:支持function传入</info>
+        <build>34:支持https</build>
         <build>33:修复和完善抛出异常的捕获</build>
         <build>32:新增setCallbackWindowName接口，解决偶尔收不到回调的问题</build>
         <build>31:更新微信登陆相关接口</build>

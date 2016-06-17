@@ -34,7 +34,7 @@ public class WXPayGetPrepayIdTask {
     private PayReq req;
     private IWXAPI msgApi;
     private OnPayResultListener mListener;
-    
+
     private PayDataVO payData;
 
     public WXPayGetPrepayIdTask(Context mContext, PrePayDataVO prepayData, OnPayResultListener listener) {
@@ -108,7 +108,7 @@ public class WXPayGetPrepayIdTask {
                 }
             }
             if (mListener != null){
-                mListener.onGetPrepayResult(jsonObject.toString());
+                mListener.onGetPrepayResult(jsonObject);
             }
         }
 
