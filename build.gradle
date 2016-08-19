@@ -1,16 +1,36 @@
 apply plugin: 'com.android.application'
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.1.0'
+    }
+}
 
+apply plugin: 'com.android.application'
+
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+    maven {
+        url 'https://raw.githubusercontent.com/android-plugin/mvn-repo/master/'
+    }
+}
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
+    compile ('org.appcan:engine:+:systemRelease@aar')
 }
 
 android {
     signingConfigs {
         config {
-            keyAlias 'appcandevelop'
-            keyPassword '3g2win.com'
-            storeFile file('AppcanDevelop.keystore')
-            storePassword '3g2win.com'
+            keyAlias 'fetchgo.keystore'
+            keyPassword 'abc123_'
+            storeFile file('fetchgo.keystore')
+            storePassword 'abc123_'
         }
     }
     compileSdkVersion 22
@@ -47,7 +67,7 @@ android {
     }
     defaultConfig {
         signingConfig signingConfigs.config
-        applicationId 'org.zywx.wbpalmstar.widgetone.uexweixin'
+        applicationId  'com.zy.fetchgo'
     }
     productFlavors {
     }
@@ -57,3 +77,4 @@ android {
         }
     }
 }
+apply from: "https://raw.githubusercontent.com/android-plugin/gradle-plugin/master/buildPlugin.gradle"
