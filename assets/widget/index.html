@@ -1,88 +1,66 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="css/index.css">
+<!DOCTYPE html>
+<html class="um landscape min-width-240px min-width-320px min-width-480px min-width-768px min-width-1024px">
+    
+    <head>
+        <title>
+        </title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" href="css/fonts/font-awesome.min.css">
+        <link rel="stylesheet" href="css/ui-box.css">
+        <link rel="stylesheet" href="css/ui-base.css">
+        <link rel="stylesheet" href="css/ui-color.css">
+        <link rel="stylesheet" href="css/appcan.icon.css">
+        <link rel="stylesheet" href="css/appcan.control.css">
+        <link rel="stylesheet" href="./css/index.css">
+        <script src="js/eruda.min.js"></script>
+        <script src="./js/index.js">
+        </script>
+    </head>
+    
+    <body class="" ontouchstart>
+        <div class="bc-bg" tabindex="0" data-control="PAGE" id="Page_ylUCGd">
+            <div class="uh bc-head  ubb bc-border" data-control="HEADER" id="Header_bPMcMr">
+                <div class="ub">
+                    <div class="nav-btn" id="nav-left">
+                        <div class="fa fa-1g ub-img1">
+                        </div>
+                    </div>
+                    <h1 class="ut ub-f1 ulev-3 ut-s tx-c" tabindex="0">测试系统</h1>
+                    <div class="nav-btn" id="nav-right">
+                        <div class="fa  fa-1g  ub-img1">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="" data-control="BOX">
+                <div class="button ub ub-ac bc-text-head ub-pc bc-btn" id="Button_DgxEcP" onclick="openTestCase('uexFileMgr')">uexFileMgr</div>
+            </div>
+            <div class="" data-control="BOX">
+                <div class="button ub ub-ac bc-text-head ub-pc bc-btn" id="uexXmlHttpMgr" onclick='openTestCase("uexXMLHttpMgr")'>uexXmlHttpMgr</div>
+            </div>
+            <div class="button ub ub-ac bc-text-head ub-pc bc-btn" id="uexUploaderMgr" onclick='openTestCase("uexUploaderMgr")'>uexUploaderMgr</div>
+            <div class="button ub ub-ac bc-text-head ub-pc bc-btn" id="uexDatabaseMgr" onclick='openTestCase("uexDatabaseMgr")'>uexDatabaseMgr</div>
+            <div class="button ub ub-ac bc-text-head ub-pc bc-btn" id="uexDownloaderMgr" onclick='openTestCase("uexDownloaderMgr")'>uexDownloaderMgr</div>
+            <div class="button ub ub-ac bc-text-head ub-pc bc-btn" id="uexDevice" onclick='openTestCase("uexDevice")'>uexDevice</div>
+            <div class="button ub ub-ac bc-text-head ub-pc bc-btn" id="uexSocketMgr" onclick='openTestCase("uexSocketMgr")'>uexSocketMgr</div>
+            <div class="button ub ub-ac bc-text-head ub-pc bc-btn" id="uexWeiXin" onclick='openTestCase("uexWeiXin")'>uexWeiXin</div>
+            <div class="button ub ub-ac bc-text-head ub-pc bc-btn" id="uexQQ" onclick='openTestCase("uexQQ")'>uexQQ</div>
+            <div class="button ub ub-ac bc-text-head ub-pc bc-btn" id="uexImage" onclick='openTestCase("uexImage")'>uexImage</div>
+            <div class="button ub ub-ac bc-text-head ub-pc bc-btn" id="uexAudio" onclick='openTestCase("uexAudio")'>uexAudio</div>
+            <div class="button ub ub-ac bc-text-head ub-pc bc-btn" id="uexButton" onclick='openTestCase("uexButton")'>uexButton</div>
+        </div>
+        <script src="js/appcan.js">
+        </script>
+        <script src="js/appcan.control.js">
+        </script>
+        <script src="js/appcan.scrollbox.js">
+        </script>
+        <script src="js/template.import.js">
+        </script>
+        <script src="./assets/mvvm/index.js">
+        </script>
 
-    <script type="text/javascript">
-    var prepayId;
-    function getPrepayId(){
-        var params = {
-            appid:"wxb6063c9583fe2f3c",//(必选)
-            mch_id:"1218553301",//(必选)
-            device_info:"013467007045764",//(可选)
-            nonce_str:"weradfdgdvccfexs1",//(必选)
-            body:"appcan支付测试",//(必选)
-            detail:"detail",//(可选)
-            attach:"attach",//(可选)
-            out_trade_no:"1217752501201405033233356018",//(必选)
-            fee_type:"CNY",//(可选)
-            total_fee:"1",//(必选)
-            spbill_create_ip:"127.0.0.1",//(必选)
-            time_start:"20150503152510",//(可选)
-            time_expire:"20150703152510",//(可选)
-            goods_tag:"WXG",//(可选)
-            notify_url:"http://www.baidu.com/",//(必选)
-            trade_type:"APP",//(必选)
-            product_id:"12235413214070356458058",//(可选)
-            //openid:"oUpF8uMuAJO_M2pxb1Q9zNjWeS6o",//(可选)
-            sign:"748F903B8E3F2C0B2CC6B287B9A28078"//(必选)
-        };
-        var data = JSON.stringify(params);
-        uexWeiXin.getPrepayId(data, function(data) {
-             alert(JSON.stringify(data));
-        });
-    }
+    </body>
 
-    function startPay(){
-        var params = {
-            appid:"wx1d0ae0c3f53f15b4",//(必选) 微信分配的AppID
-            partnerid:"1218553301",//(必选) 微信支付分配的商户号
-            prepayid:"wx20150603181434ca570302570213927334",//(必选)
-            package:"Sign=WXPay",//(必选)
-            noncestr:"weradfdgdvccfexs",//(必选)
-            timestamp:"1412000000",//(必选)
-            sign:"137AE3E0FA57EF7401774049DFE999EE"//(必选)
-        };
-        var data = JSON.stringify(params);
-        uexWeiXin.startPay(data, function(data) {
-             alert(JSON.stringify(data));
-        });
-    }
-
-
-        window.uexOnload = function(type){
-            if(type == 0){
-                uexWeiXin.cbGetPrepayId = cbGetPrepayId;
-                uexWeiXin.cbStartPay = cbStartPay;
-            }
-        }
-    function cbGetPrepayId(info){
-        console.log(info);
-        alert(info);
-        prepayId = JSON.parse(info).prepay_id;
-        alert(prepayId);
-    }
-
-    function cbStartPay(info){
-        console.log(info);
-        alert(info);
-    }
-    </script>
-</head>
-
-<body>
-<div class="tit">支付</div>
-<div class="conbor">
-    <div class="consj">
-            <input class='btn' type='button' value='getPrepayId' onclick='getPrepayId()'>
-
-            <input class='btn' type='button' value='startPay' onclick='startPay()'>
-
-
-    </div>
-</div>
-</body>
 </html>

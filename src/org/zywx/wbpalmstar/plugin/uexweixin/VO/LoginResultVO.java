@@ -4,17 +4,17 @@ import java.io.Serializable;
 
 public class LoginResultVO implements Serializable{
     private static final long serialVersionUID = 6461157892438453583L;
-    private String errCode;
+    private int errCode;
     private String code;
     private String state;
     private String language;
     private String country;
 
-    public String getErrCode() {
+    public int getErrCode() {
         return errCode;
     }
 
-    public void setErrCode(String errCode) {
+    public void setErrCode(int errCode) {
         this.errCode = errCode;
     }
 
