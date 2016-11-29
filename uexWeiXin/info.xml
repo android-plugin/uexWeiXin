@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexWeiXin" version="4.0.0" build = "0">
-        <info>0:微信分享功能插件</info>
+    <plugin uexName="uexWeiXin" version="4.0.1" build = "1">
+        <info>1:shareLinkContent支持网络图片</info>
+        <build>0:微信分享功能插件</build>
     </plugin>
 </uexplugins>

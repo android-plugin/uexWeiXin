@@ -43,6 +43,7 @@ import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginResultVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.PayDataVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.PrePayDataVO;
+import org.zywx.wbpalmstar.plugin.uexweixin.utils.IFeedback;
 import org.zywx.wbpalmstar.plugin.uexweixin.utils.JsConst;
 import org.zywx.wbpalmstar.plugin.uexweixin.utils.WXPayGetPrepayIdTask;
 
@@ -1131,17 +1132,17 @@ public class EuexWeChat extends EUExBase {
 	 *            图片地址
 	 * @return true 发送成功， false 发送失败
 	 */
-	public boolean shareImage(int scene, String thumbImgPath,
+	public void shareImage(final int scene, String thumbImgPath,
 			String realImgPath) {
 		if (realImgPath == null || realImgPath.length() == 0) {
-			return false;
+			return;
 		}
 
         String imgPath = BUtility.makeRealPath(
                 BUtility.makeUrl(mBrwView.getCurrentUrl(), realImgPath),
                 mBrwView.getCurrentWidget().m_widgetPath,
                 mBrwView.getCurrentWidget().m_wgtType);
-		WXImageObject imgObj = createImageObject(imgPath);
+        final WXImageObject imgObj = createImageObject(imgPath);
 
 		String thumbPath = BUtility.makeRealPath(
 				BUtility.makeUrl(mBrwView.getCurrentUrl(), thumbImgPath),
@@ -1151,17 +1152,33 @@ public class EuexWeChat extends EUExBase {
 		if (thumbPath == null || thumbPath.length() == 0) {
 			thumbPath = imgPath;
 		}
-		Bitmap thumbBmp = createThumbBitmap(thumbPath);
 
-		WXMediaMessage msg = new WXMediaMessage();
-		msg.thumbData = Utils.bmpToByteArray(thumbBmp, true);
-		msg.mediaObject = imgObj;
+        new DecodeImageAsyncTask(mContext, new IFeedback<Bitmap>() {
+            @Override
+            public void onFeedback(Bitmap bitmap) {
+                WXMediaMessage msg = new WXMediaMessage();
+                msg.thumbData = Utils.bmpToByteArray(bitmap, true);
+                msg.mediaObject = imgObj;
 
-		SendMessageToWX.Req req = new SendMessageToWX.Req();
-		req.transaction = buildTransaction("img");
-		req.message = msg;
-		req.scene = scene;
-		return api.sendReq(req);
+                SendMessageToWX.Req req = new SendMessageToWX.Req();
+                req.transaction = buildTransaction("img");
+                req.message = msg;
+                req.scene = scene;
+                api.sendReq(req);
+            }
+        }).execute(thumbPath);
+//
+//		Bitmap thumbBmp = createThumbBitmap(thumbPath);
+//
+//		WXMediaMessage msg = new WXMediaMessage();
+//		msg.thumbData = Utils.bmpToByteArray(thumbBmp, true);
+//		msg.mediaObject = imgObj;
+//
+//		SendMessageToWX.Req req = new SendMessageToWX.Req();
+//		req.transaction = buildTransaction("img");
+//		req.message = msg;
+//		req.scene = scene;
+//		return api.sendReq(req);
 	}
 
 	public boolean shareLinkContent(String[] params) {
@@ -1203,31 +1220,35 @@ public class EuexWeChat extends EUExBase {
 	 *            网页url
 	 * @return true 发送成功， false 发送失败
 	 */
-	public boolean shareLink(int scene, String thumbImgPath,
-			String title, String description, String wedpageUrl) {
+	public void shareLink(final int scene, final String thumbImgPath,
+			final String title, final String description, final String wedpageUrl) {
 		if (wedpageUrl == null || wedpageUrl.length() == 0) {
-			return false;
+			return;
 		}
 
         String thumbPath = BUtility.makeRealPath(
                 BUtility.makeUrl(mBrwView.getCurrentUrl(), thumbImgPath),
                 mBrwView.getCurrentWidget().m_widgetPath,
                 mBrwView.getCurrentWidget().m_wgtType);
-		Bitmap thumbBmp = createThumbBitmap(thumbPath);
 
-		WXMediaMessage msg = new WXMediaMessage();
-		msg.thumbData = Utils.bmpToByteArray(thumbBmp, true);
-		msg.title = title;
-		msg.description = description;
-		WXWebpageObject webObj = new WXWebpageObject();
-		webObj.webpageUrl = wedpageUrl;
-		msg.mediaObject = webObj;
+        new DecodeImageAsyncTask(mContext, new IFeedback<Bitmap>() {
+            @Override
+            public void onFeedback(Bitmap bitmap) {
+                WXMediaMessage msg = new WXMediaMessage();
+                msg.thumbData = Utils.bmpToByteArray(bitmap, true);
+                msg.title = title;
+                msg.description = description;
+                WXWebpageObject webObj = new WXWebpageObject();
+                webObj.webpageUrl = wedpageUrl;
+                msg.mediaObject = webObj;
 
-		SendMessageToWX.Req req = new SendMessageToWX.Req();
-		req.transaction = buildTransaction("link");
-		req.message = msg;
-		req.scene = scene;
-		return api.sendReq(req);
+                SendMessageToWX.Req req = new SendMessageToWX.Req();
+                req.transaction = buildTransaction("link");
+                req.message = msg;
+                req.scene = scene;
+                api.sendReq(req);
+            }
+        }).execute(thumbPath);
 	}
 
 	private WXImageObject createImageObject(String imgPath) {

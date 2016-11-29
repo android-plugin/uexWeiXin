@@ -68,6 +68,7 @@ android {
     defaultConfig {
         signingConfig signingConfigs.config
         applicationId  'com.zy.fetchgo'
+        multiDexEnabled  true
     }
     productFlavors {
     }
