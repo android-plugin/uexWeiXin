@@ -51,7 +51,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -254,8 +253,6 @@ public class EuexWeChat extends EUExBase {
 	/**
 	 * 注册应用到微信
 	 *
-	 * @param appId
-	 *            从微信开放平台申请的appId
 	 * @return true 注册成功， false 注册失败
 	 */
 	public int registerApp(String[] data) {
@@ -577,8 +574,6 @@ public class EuexWeChat extends EUExBase {
 	 *
 	 * @param scene
 	 *            发送场景，0 微信， 1 朋友圈
-	 * @param thumImgPath
-	 *            缩略图地址
 	 * @param realImgPath
 	 *            图片地址
 	 * @return true 发送成功， false 发送失败
@@ -1126,8 +1121,6 @@ public class EuexWeChat extends EUExBase {
 	 *
 	 * @param scene
 	 *            发送场景，0 微信， 1 朋友圈
-	 * @param thumImgPath
-	 *            缩略图地址
 	 * @param realImgPath
 	 *            图片地址
 	 * @return true 发送成功， false 发送失败
@@ -1210,8 +1203,6 @@ public class EuexWeChat extends EUExBase {
 	 *
 	 * @param scene
 	 *            发送场景，0 微信， 1 朋友圈
-	 * @param thumImgPath
-	 *            缩略图地址
 	 * @param title
 	 *            网页标题
 	 * @param description
@@ -1254,7 +1245,7 @@ public class EuexWeChat extends EUExBase {
 	private WXImageObject createImageObject(String imgPath) {
 		WXImageObject imgObj = new WXImageObject();
 		if (imgPath.startsWith("http://")||imgPath.startsWith("https://")) {
-			imgObj.imageUrl = imgPath;
+			imgObj.imagePath = imgPath;
 		} else {
 			if (imgPath.startsWith("/")) {
 				imgObj.imagePath = imgPath;

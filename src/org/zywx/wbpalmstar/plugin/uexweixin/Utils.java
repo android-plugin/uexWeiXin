@@ -27,6 +27,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.zywx.wbpalmstar.base.BDebug;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -133,8 +134,9 @@ public class Utils {
 	      
 	    public SSLSocketFactoryEx(KeyStore truststore) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {      
 	        super(truststore);      
-	      
-	        TrustManager tm = new X509TrustManager() {      
+
+
+	        final TrustManager tm = new X509TrustManager() {
 	      
 	            public X509Certificate[] getAcceptedIssuers() {      
 	                return null;      
@@ -142,11 +144,23 @@ public class Utils {
 	      
 				@Override
 				public void checkClientTrusted(X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
+					try {
+						chain[0].checkValidity();
+					} catch (Exception e) {
+						BDebug.e("Certificate not valid or trusted.");
+					}
+
 				}
 
 				@Override
 				public void checkServerTrusted(X509Certificate[] chain,	String authType) throws java.security.cert.CertificateException {
-				}  
+					try {
+						chain[0].checkValidity();
+					} catch (Exception e) {
+						BDebug.e("Certificate not valid or trusted.");
+					}
+
+				}
 	        };      
 	      
 	        sslContext.init(null, new TrustManager[] { tm }, null);      
