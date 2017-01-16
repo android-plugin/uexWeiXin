@@ -172,7 +172,7 @@ public class EuexWeChat extends EUExBase {
                         JSONObject obj = new JSONObject();
                         obj.put("errCode", msg.errCode);
                         obj.put("errStr", msg.errStr);
-                        callbackToJs(Integer.parseInt(startPayFuncId), false, BUtility.transcoding(obj.toString()));
+                        callbackToJs(Integer.parseInt(startPayFuncId), false, DataHelper.gson.toJsonTree(obj));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -233,7 +233,7 @@ public class EuexWeChat extends EUExBase {
                         String resultStr = DataHelper.gson.toJson(resultVO);
                         shareCallBack(JsConst.CALLBACK_LOGIN, resultStr);
                         if (null != loginFunId) {
-                            callbackToJs(Integer.parseInt(loginFunId), false, BUtility.transcoding(resultStr));
+                            callbackToJs(Integer.parseInt(loginFunId), false, DataHelper.gson.toJsonTree(resultVO));
 //                            try {
 //                                callbackToJs(Integer.parseInt(loginFunId), false, new JSONObject(resultStr));
 //                            } catch (JSONException e) {
@@ -409,7 +409,7 @@ public class EuexWeChat extends EUExBase {
 //                            } catch (JSONException e) {
 //                                e.printStackTrace();
 //                            }
-                            callbackToJs(Integer.parseInt(getLoginAccessTokenFunId), false, BUtility.transcoding(result));
+                            callbackToJs(Integer.parseInt(getLoginAccessTokenFunId), false, DataHelper.gson.toJsonTree(result));
                         } else {
                             callBackPluginJs(JsConst.CALLBACK_GET_LOGIN_ACCESS_TOKEN, result);
                         }
@@ -425,7 +425,7 @@ public class EuexWeChat extends EUExBase {
 //                            } catch (JSONException e) {
 //                                e.printStackTrace();
 //                            }
-                            callbackToJs(Integer.parseInt(getLoginRefreshAccessTokenFunId), false, BUtility.transcoding(result));
+                            callbackToJs(Integer.parseInt(getLoginRefreshAccessTokenFunId), false, DataHelper.gson.toJsonTree(result));
                         } else {
                             callBackPluginJs(JsConst.CALLBACK_GET_LOGIN_REFRESH_ACCESS_TOKEN, result);
                         }
@@ -441,7 +441,7 @@ public class EuexWeChat extends EUExBase {
 //                            } catch (JSONException e) {
 //                                e.printStackTrace();
 //                            }
-                            callbackToJs(Integer.parseInt(getLoginCheckAccessTokenFunId), false, BUtility.transcoding(result));
+                            callbackToJs(Integer.parseInt(getLoginCheckAccessTokenFunId), false, DataHelper.gson.toJsonTree(result));
                         } else {
                             callBackPluginJs(JsConst.CALLBACK_GET_LOGIN_CHECK_ACCESS_TOKEN, result);
                         }
