@@ -101,8 +101,7 @@ if (UNIT_TEST) {
 
         },
         "shareImageContent":function(){
-            //image参数不支持网络图片
-            uexWeiXin.shareImageContent('{"thumbImg":"http://www.appcan.cn/images/logo.png","image":"res://image.jpg","scene":1}',function(error) {
+            uexWeiXin.shareImageContent('{"thumbImg":"res://icon.png","image":"res://image.jpg","scene":1}',function(error) {
                 if(!error){
                     UNIT_TEST.log("分享成功");
                     UNIT_TEST.assertTrue(error == 0);
@@ -112,7 +111,7 @@ if (UNIT_TEST) {
                 });
         },
         "shareLinkContent":function(){
-            uexWeiXin.shareLinkContent('{"thumbImg":"http://www.appcan.cn/images/logo.png","wedpageUrl":"http://www.appcan.cn","scene":1,"title":"你好,我是AppCan","description":"你好,我是AppCan描述"}',function(error) {
+            uexWeiXin.shareLinkContent('{"thumbImg":"res://icon.png","wedpageUrl":"http://www.appcan.cn","scene":1,"title":"你好,我是AppCan","description":"你好,我是AppCan描述"}',function(error) {
                 if(!error){
                     UNIT_TEST.log("分享成功");
                     UNIT_TEST.assertTrue(error == 0);
@@ -120,7 +119,7 @@ if (UNIT_TEST) {
                     UNIT_TEST.assert(false);
                 }
             });
-
+            
         },
         "getPrepayId":function(){
             var date = new Date();
@@ -158,13 +157,13 @@ if (UNIT_TEST) {
                     UNIT_TEST.log(data.return_msg);
                     UNIT_TEST.assert(false);
                 }
-
-
+                
+                
             }else{
                 UNIT_TEST.assert(false);
                 }
             });
-
+            
         },
         "startPay":function(){
             var date = new Date();
@@ -182,8 +181,7 @@ if (UNIT_TEST) {
             param1.sign = hex_md5(strrrr).toUpperCase();
             var data1 = JSON.stringify(param1);
             uexWeiXin.startPay(data1,function(data){
-                    var info = JSON.parse(data);
-                    if(!info.errCode){
+                    if(!data.errCode){
                         UNIT_TEST.log("支付成功");
                         UNIT_TEST.assert(true);
                     }else{
@@ -199,10 +197,9 @@ if (UNIT_TEST) {
             };
             var data = JSON.stringify(params);
             uexWeiXin.login(data,function(data){
-                var info = JSON.parse(data);
-                   if(!info.errCode){
-                        code = info.code;
-                        UNIT_TEST.log("登录成功:"+data);
+                   if(!data.errCode){
+                        code = data.code;
+                        UNIT_TEST.log("登录成功:"+JSON.stringify(data));
                         UNIT_TEST.assert(true);
                     }else{
                         UNIT_TEST.assert(false);
@@ -218,10 +215,9 @@ if (UNIT_TEST) {
             };
             var data = JSON.stringify(params);
             uexWeiXin.getLoginAccessToken(data,function(data){
-                var info = JSON.parse(data);
-                if(!info.errCode){
-                    refresh_token = info.refresh_token;
-                    UNIT_TEST.log("获取access_token成功:"+data);
+                if(!data.errCode){
+                    refresh_token = data.refresh_token;
+                    UNIT_TEST.log("获取access_token成功:"+JSON.stringify(data));
                     UNIT_TEST.assert(true);
                 }else{
                     UNIT_TEST.assert(false);
@@ -235,11 +231,10 @@ if (UNIT_TEST) {
             };
             var data = JSON.stringify(params);
             uexWeiXin.getLoginRefreshAccessToken(data,function(data){
-                    var info = JSON.parse(data);
-                    if(!info.errCode){
-                            openid = info.openid;
-                            accessToken = info.access_token;
-                            UNIT_TEST.log("获取刷新access_token成功:"+data);
+                    if(!data.errCode){
+                            openid = data.openid;
+                            accessToken = data.access_token;
+                            UNIT_TEST.log("获取刷新access_token成功:"+JSON.stringify(data));
                             UNIT_TEST.assert(true);
                     }else{
                             UNIT_TEST.assert(false);
@@ -253,18 +248,17 @@ if (UNIT_TEST) {
             };
             var data = JSON.stringify(params);
             uexWeiXin.getLoginCheckAccessToken(data,function(data){
-                var info = JSON.parse(data);
-           if(!info.errcode){
-                 UNIT_TEST.log("检验access_token成功:"+data);
+           if(!data.errcode){
+                 UNIT_TEST.log("检验access_token成功:"+JSON.stringify(data));
                  UNIT_TEST.assert(true);
            }else{
-                 UNIT_TEST.log("检验access_token失败:"+data);
+                 UNIT_TEST.log("检验access_token失败:"+JSON.stringify(data));
                  UNIT_TEST.assert(false);
             }
             });
         }
 
-
+       
     }
     UNIT_TEST.addCase("weiXin", uexWeiXinCase);
 }
