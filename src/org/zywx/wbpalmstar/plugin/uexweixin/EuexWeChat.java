@@ -400,48 +400,48 @@ public class EuexWeChat extends EUExBase {
                 switch (countCode){
                     case Constants.token:
                         if(getLoginAccessTokenFunId != null) {
-//                            try {
-//                                JSONObject jsonObject = null;
-//                                if (!TextUtils.isEmpty(result)) {
-//                                    jsonObject =  new JSONObject(result);
-//                                }
-//                                callbackToJs(Integer.parseInt(getLoginAccessTokenFunId), false, jsonObject);
-//                            } catch (JSONException e) {
-//                                e.printStackTrace();
-//                            }
-                            callbackToJs(Integer.parseInt(getLoginAccessTokenFunId), false, result);
+                            try {
+                                JSONObject jsonObject = null;
+                                if (!TextUtils.isEmpty(result)) {
+                                    jsonObject =  new JSONObject(result);
+                                }
+                                callbackToJs(Integer.parseInt(getLoginAccessTokenFunId), false, jsonObject);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            //callbackToJs(Integer.parseInt(getLoginAccessTokenFunId), false, result);
                         } else {
                             callBackPluginJs(JsConst.CALLBACK_GET_LOGIN_ACCESS_TOKEN, result);
                         }
                         break;
                     case Constants.refresh:
                         if(getLoginRefreshAccessTokenFunId != null) {
-//                            try {
-//                                JSONObject jsonObject = null;
-//                                if (!TextUtils.isEmpty(result)) {
-//                                    jsonObject =  new JSONObject(result);
-//                                }
-//                                callbackToJs(Integer.parseInt(getLoginRefreshAccessTokenFunId), false, jsonObject);
-//                            } catch (JSONException e) {
-//                                e.printStackTrace();
-//                            }
-                            callbackToJs(Integer.parseInt(getLoginRefreshAccessTokenFunId), false, result);
+                            try {
+                                JSONObject jsonObject = null;
+                                if (!TextUtils.isEmpty(result)) {
+                                    jsonObject =  new JSONObject(result);
+                                }
+                                callbackToJs(Integer.parseInt(getLoginRefreshAccessTokenFunId), false, jsonObject);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            //callbackToJs(Integer.parseInt(getLoginRefreshAccessTokenFunId), false, result);
                         } else {
                             callBackPluginJs(JsConst.CALLBACK_GET_LOGIN_REFRESH_ACCESS_TOKEN, result);
                         }
                         break;
                     case Constants.check:
                         if(getLoginCheckAccessTokenFunId != null) {
-//                            try {
-//                                JSONObject jsonObject = null;
-//                                if (!TextUtils.isEmpty(result)) {
-//                                    jsonObject =  new JSONObject(result);
-//                                }
-//                                callbackToJs(Integer.parseInt(getLoginCheckAccessTokenFunId), false, jsonObject);
-//                            } catch (JSONException e) {
-//                                e.printStackTrace();
-//                            }
-                            callbackToJs(Integer.parseInt(getLoginCheckAccessTokenFunId), false, result);
+                            try {
+                                JSONObject jsonObject = null;
+                                if (!TextUtils.isEmpty(result)) {
+                                    jsonObject =  new JSONObject(result);
+                                }
+                                callbackToJs(Integer.parseInt(getLoginCheckAccessTokenFunId), false, jsonObject);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                            //callbackToJs(Integer.parseInt(getLoginCheckAccessTokenFunId), false, result);
                         } else {
                             callBackPluginJs(JsConst.CALLBACK_GET_LOGIN_CHECK_ACCESS_TOKEN, result);
                         }
