@@ -49,8 +49,6 @@ public class DecodeImageAsyncTask extends AsyncTask<String, Void, Bitmap> {
 
                     bmp = BitmapFactory.decodeStream(mContext.getAssets().open(url));
                 } catch (IOException e) {
-                    Toast.makeText(mContext, "错误：" + e.getMessage(),
-                            Toast.LENGTH_SHORT).show();
                     e.printStackTrace();
                 }
             }
