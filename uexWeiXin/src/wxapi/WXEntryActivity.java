@@ -59,7 +59,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 	@Override
 	public void onResp(final BaseResp resp) {
 		int statusCode = 0;
-		Log.i("resp", resp.getType() + "----------");
+		Log.i(EuexWeChat.TAG + "-onResp:", resp.getType() + "----------");
 		switch (resp.errCode) {
 		case BaseResp.ErrCode.ERR_AUTH_DENIED:
 			statusCode = -4;
