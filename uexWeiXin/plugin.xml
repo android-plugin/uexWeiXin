@@ -34,5 +34,8 @@
         <method name="getLoginUnionID"/>
 
         <method name = "setCallbackWindowName"/>
+
+        <method name = "shareVideoContent"/>
+        <method name = "shareMusicContent"/>
     </plugin>
 </uexplugins>

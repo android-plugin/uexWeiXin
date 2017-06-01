@@ -13,17 +13,19 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.tencent.mm.sdk.constants.Build;
-import com.tencent.mm.sdk.modelbase.BaseResp;
-import com.tencent.mm.sdk.modelmsg.SendAuth;
-import com.tencent.mm.sdk.modelmsg.SendMessageToWX;
-import com.tencent.mm.sdk.modelmsg.WXImageObject;
-import com.tencent.mm.sdk.modelmsg.WXMediaMessage;
-import com.tencent.mm.sdk.modelmsg.WXTextObject;
-import com.tencent.mm.sdk.modelmsg.WXWebpageObject;
-import com.tencent.mm.sdk.modelpay.PayReq;
-import com.tencent.mm.sdk.openapi.IWXAPI;
-import com.tencent.mm.sdk.openapi.WXAPIFactory;
+import com.tencent.mm.opensdk.constants.Build;
+import com.tencent.mm.opensdk.modelbase.BaseResp;
+import com.tencent.mm.opensdk.modelmsg.SendAuth;
+import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
+import com.tencent.mm.opensdk.modelmsg.WXImageObject;
+import com.tencent.mm.opensdk.modelmsg.WXMediaMessage;
+import com.tencent.mm.opensdk.modelmsg.WXMusicObject;
+import com.tencent.mm.opensdk.modelmsg.WXTextObject;
+import com.tencent.mm.opensdk.modelmsg.WXVideoObject;
+import com.tencent.mm.opensdk.modelmsg.WXWebpageObject;
+import com.tencent.mm.opensdk.modelpay.PayReq;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -43,6 +45,8 @@ import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginResultVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.PayDataVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.PrePayDataVO;
+import org.zywx.wbpalmstar.plugin.uexweixin.VO.ShareMusicVO;
+import org.zywx.wbpalmstar.plugin.uexweixin.VO.ShareVideoVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.utils.IFeedback;
 import org.zywx.wbpalmstar.plugin.uexweixin.utils.JsConst;
 import org.zywx.wbpalmstar.plugin.uexweixin.utils.WXPayGetPrepayIdTask;
@@ -58,35 +62,35 @@ import java.util.Random;
 @SuppressLint("SdCardPath")
 public class EuexWeChat extends EUExBase {
 
-	private static final String TAG = "EuexWeChat";
+	public static final String TAG = "EuexWeChat";
 
-	public final static String PARAMS_JSON_KEY_TEXT = "text";
-	public final static String PARAMS_JSON_KEY_SCENE = "scene";
-	public final static String PARAMS_JSON_KEY_THUMBIMG = "thumbImg";
-	public final static String PARAMS_JSON_KEY_IMAGE = "image";
-	public final static String PARAMS_JSON_KEY_WEDPAGEURL = "wedpageUrl";
-	public final static String PARAMS_JSON_KEY_TITLE = "title";
-	public final static String PARAMS_JSON_KEY_DESCRIPTION = "description";
+    private final static String PARAMS_JSON_KEY_TEXT = "text";
+    private final static String PARAMS_JSON_KEY_SCENE = "scene";
+    private final static String PARAMS_JSON_KEY_THUMBIMG = "thumbImg";
+    private final static String PARAMS_JSON_KEY_IMAGE = "image";
+    private final static String PARAMS_JSON_KEY_WEDPAGEURL = "wedpageUrl";
+    private final static String PARAMS_JSON_KEY_TITLE = "title";
+    private final static String PARAMS_JSON_KEY_DESCRIPTION = "description";
 
-	public static final String CB_REGISTER_WXAPP_RESULT = "uexWeiXin.cbRegisterApp";//注册回调
-	public static final String CB_IS_WXAPP_INSTALLIED = "uexWeiXin.cbIsWXAppInstalled";//
-	public static final String CB_SEND_TEXT_CONTENT = "uexWeiXin.cbSendTextContent";//
-	public static final String CB_SEND_IMAGE_CONTENT = "uexWeiXin.cbSendImageContent";
-	public static final String CB_IS_PAY_SUPPORTED = "uexWeiXin.cbIsSupportPay";
-	public static final String CB_GET_ACCESS_TOKEN = "uexWeiXin.cbGetAccessToken";
-	public static final String CB_GET_PREPAY_ID = "uexWeiXin.cbGenerateAdvanceOrder";
-	public static final String CB_GET_PAY_RESULT = "uexWeiXin.cbGotoPay";
-	public static final String CB_GET_ACCESS_TOKEN_LOCAL = "uexWeiXin.cbGetAccessTokenLocal";
-	public static final String CB_SHARE_TEXT_CONTENT = "uexWeiXin.cbShareTextContent";
-	public static final String CB_SHARE_IMAGE_CONTENT = "uexWeiXin.cbShareImageContent";
-	public static final String CB_SHARE_LINK_CONTENT = "uexWeiXin.cbShareLinkContent";
+    private static final String CB_REGISTER_WXAPP_RESULT = "uexWeiXin.cbRegisterApp";//注册回调
+    private static final String CB_IS_WXAPP_INSTALLIED = "uexWeiXin.cbIsWXAppInstalled";//
+    private static final String CB_SEND_TEXT_CONTENT = "uexWeiXin.cbSendTextContent";//
+    private static final String CB_SEND_IMAGE_CONTENT = "uexWeiXin.cbSendImageContent";
+    private static final String CB_IS_PAY_SUPPORTED = "uexWeiXin.cbIsSupportPay";
+    private static final String CB_GET_ACCESS_TOKEN = "uexWeiXin.cbGetAccessToken";
+    private static final String CB_GET_PREPAY_ID = "uexWeiXin.cbGenerateAdvanceOrder";
+    private static final String CB_GET_PAY_RESULT = "uexWeiXin.cbGotoPay";
+    private static final String CB_GET_ACCESS_TOKEN_LOCAL = "uexWeiXin.cbGetAccessTokenLocal";
+    private static final String CB_SHARE_TEXT_CONTENT = "uexWeiXin.cbShareTextContent";
+    private static final String CB_SHARE_IMAGE_CONTENT = "uexWeiXin.cbShareImageContent";
+    private static final String CB_SHARE_LINK_CONTENT = "uexWeiXin.cbShareLinkContent";
 
 	// 微信登陆
-	public static final String CB_LOGIN_WEIXIN = "uexWeiXin.cbWeiXinLogin";
-	public static final String CB_GETWEIXINLOGINACCESSTOKEN = "uexWeiXin.cbGetWeiXinLoginAccessToken";
-	public static final String CB_GETWEIXINLOGINREFRESHACCESSTOKEN = "uexWeiXin.cbGetWeiXinLoginRefreshAccessToken";
-	public static final String CB_GETWEIXINLOGINCHECKACCESSTOKEN = "uexWeiXin.cbGetWeiXinLoginCheckAccessToken";
-	public static final String CB_GETWEIXINLOGINUNIONID = "uexWeiXin.cbGetWeiXinLoginUnionID";
+    private static final String CB_LOGIN_WEIXIN = "uexWeiXin.cbWeiXinLogin";
+    private static final String CB_GETWEIXINLOGINACCESSTOKEN = "uexWeiXin.cbGetWeiXinLoginAccessToken";
+    private static final String CB_GETWEIXINLOGINREFRESHACCESSTOKEN = "uexWeiXin.cbGetWeiXinLoginRefreshAccessToken";
+    private static final String CB_GETWEIXINLOGINCHECKACCESSTOKEN = "uexWeiXin.cbGetWeiXinLoginCheckAccessToken";
+    private static final String CB_GETWEIXINLOGINUNIONID = "uexWeiXin.cbGetWeiXinLoginUnionID";
 
 	private static final int THUMB_SIZE = 100;
 
@@ -95,7 +99,8 @@ public class EuexWeChat extends EUExBase {
 	private static final int SHARE_TEXT_CONTENT_CODE = 3;
 	private static final int SHARE_IMAGE_CONTENT_CODE = 4;
 	private static final int SHARE_LINK_CONTENT_CODE = 5;
-
+    private static final int SHARE_VIDEO_CONTENT_CODE = 6;
+    private static final int SHARE_MUSIC_CONTENT_CODE = 7;
 	private static IWXAPI api;
 	public static WeChatCallBack weChatCallBack;
 	private String appId;
@@ -124,6 +129,8 @@ public class EuexWeChat extends EUExBase {
     //分享图片的回调函数
     private String shareImageFunId;
     private String shareLinkFunId;
+    private String shareVideoFunId;
+    private String shareMusicFunId;
     private String loginFunId;
     private String getLoginAccessTokenFunId;
     private String getLoginRefreshAccessTokenFunId;
@@ -210,7 +217,15 @@ public class EuexWeChat extends EUExBase {
                     if (null != shareLinkFunId) {
                         callbackToJs(Integer.parseInt(shareLinkFunId), false, message == 0 ? EUExCallback.F_C_SUCCESS: EUExCallback.F_C_FAILED);
                     }
-				}
+				} else if (code == SHARE_VIDEO_CONTENT_CODE) {
+                    if (null != shareVideoFunId) {
+                        callbackToJs(Integer.parseInt(shareVideoFunId), false, message == 0 ? EUExCallback.F_C_SUCCESS: EUExCallback.F_C_FAILED);
+                    }
+                } else if (code == SHARE_MUSIC_CONTENT_CODE) {
+                    if (null != shareMusicFunId) {
+                        callbackToJs(Integer.parseInt(shareMusicFunId), false, message == 0 ? EUExCallback.F_C_SUCCESS: EUExCallback.F_C_FAILED);
+                    }
+                }
 			}
 
 			@Override
@@ -1199,7 +1214,149 @@ public class EuexWeChat extends EUExBase {
 		return false;
 	}
 
-	/**
+    public boolean shareVideoContent(String[] params) {
+        if (params == null || params.length < 1) {
+            errorCallback(0, 0, "error params!");
+            return false;
+        }
+        if (params.length == 2) {
+            shareVideoFunId = params[1];
+        }
+        code = SHARE_VIDEO_CONTENT_CODE;
+
+        final ShareVideoVO dataVO = DataHelper.gson.fromJson(params[0], ShareVideoVO.class);
+
+        if((TextUtils.isEmpty(dataVO.getVideoUrl()) && TextUtils.isEmpty(dataVO.getVideoLowBandUrl()))
+                || TextUtils.isEmpty(dataVO.getTitle())
+                || TextUtils.isEmpty(dataVO.getThumbImg())
+        ){
+            Toast.makeText(mContext, "参数错误!", Toast.LENGTH_SHORT).show();
+        }else{
+            if(TextUtils.isEmpty(dataVO.getThumbImg())){
+                shareVideo(dataVO,null);
+            }else{
+                String thumbPath = BUtility.makeRealPath(
+                        BUtility.makeUrl(mBrwView.getCurrentUrl(), dataVO.getThumbImg()),
+                        mBrwView.getCurrentWidget().m_widgetPath,
+                        mBrwView.getCurrentWidget().m_wgtType);
+                new DecodeImageAsyncTask(mContext, new IFeedback<Bitmap>() {
+                    @Override
+                    public void onFeedback(Bitmap bitmap) {
+                        shareVideo(dataVO,bitmap);
+                    }
+                }).execute(thumbPath);
+            }
+        }
+
+        return false;
+    }
+
+    public boolean shareMusicContent(String[] params) {
+        if (params == null || params.length < 1) {
+            errorCallback(0, 0, "error params!");
+            return false;
+        }
+        if (params.length == 2) {
+            shareMusicFunId = params[1];
+        }
+        code = SHARE_MUSIC_CONTENT_CODE;
+
+        final ShareMusicVO dataVO = DataHelper.gson.fromJson(params[0], ShareMusicVO.class);
+
+        if(!dataVO.isMusicValid()){
+            Toast.makeText(mContext, "参数错误!", Toast.LENGTH_SHORT).show();
+        }else{
+            if(TextUtils.isEmpty(dataVO.getThumbImg())){
+                shareMusic(dataVO,null);
+            }else{
+                String thumbPath = BUtility.makeRealPath(
+                        BUtility.makeUrl(mBrwView.getCurrentUrl(), dataVO.getThumbImg()),
+                        mBrwView.getCurrentWidget().m_widgetPath,
+                        mBrwView.getCurrentWidget().m_wgtType);
+                new DecodeImageAsyncTask(mContext, new IFeedback<Bitmap>() {
+                    @Override
+                    public void onFeedback(Bitmap bitmap) {
+                        shareMusic(dataVO,bitmap);
+                    }
+                }).execute(thumbPath);
+            }
+        }
+
+        return false;
+    }
+
+    private void shareMusic(ShareMusicVO vo, Bitmap bitmap){
+        final String url = BUtility.makeRealPath(
+                BUtility.makeUrl(mBrwView.getCurrentUrl(), vo.getMusicUrl()),
+                mBrwView.getCurrentWidget().m_widgetPath,
+                mBrwView.getCurrentWidget().m_wgtType);
+        final String lowBandUrl = BUtility.makeRealPath(
+                BUtility.makeUrl(mBrwView.getCurrentUrl(), vo.getMusicLowBandUrl()),
+                mBrwView.getCurrentWidget().m_widgetPath,
+                mBrwView.getCurrentWidget().m_wgtType);
+        WXMusicObject music = new WXMusicObject();
+        if(!TextUtils.isEmpty(url)){
+            music.musicUrl = url;
+        }
+        if(!TextUtils.isEmpty(lowBandUrl)){
+            music.musicLowBandUrl = lowBandUrl;
+        }
+        WXMediaMessage msg = new WXMediaMessage(music);
+        if(!TextUtils.isEmpty(vo.getTitle())){
+            msg.title = vo.getTitle();
+        }
+        if(!TextUtils.isEmpty(vo.getDescription())){
+            msg.description = vo.getDescription();
+        }
+        if(bitmap != null){
+            msg.thumbData = Utils.bmpToByteArray(bitmap, true);
+        }
+
+        SendMessageToWX.Req req = new SendMessageToWX.Req();
+        req.transaction = buildTransaction("music");
+        req.message = msg;
+        req.scene = vo.getScene();
+        api.sendReq(req);
+
+    }
+
+    private void shareVideo(ShareVideoVO vo, Bitmap bitmap) {
+
+        final String videoUrl = BUtility.makeRealPath(
+                BUtility.makeUrl(mBrwView.getCurrentUrl(), vo.getVideoUrl()),
+                mBrwView.getCurrentWidget().m_widgetPath,
+                mBrwView.getCurrentWidget().m_wgtType);
+        final String videoLowBandUrl = BUtility.makeRealPath(
+                BUtility.makeUrl(mBrwView.getCurrentUrl(), vo.getVideoLowBandUrl()),
+                mBrwView.getCurrentWidget().m_widgetPath,
+                mBrwView.getCurrentWidget().m_wgtType);
+        WXVideoObject video = new WXVideoObject();
+        if(!TextUtils.isEmpty(videoUrl)){
+            video.videoUrl = videoUrl;
+        }
+        if(!TextUtils.isEmpty(videoLowBandUrl)){
+            video.videoLowBandUrl = videoLowBandUrl;
+        }
+        WXMediaMessage msg = new WXMediaMessage(video);
+        if(!TextUtils.isEmpty(vo.getTitle())){
+            msg.title = vo.getTitle();
+        }
+        if(!TextUtils.isEmpty(vo.getDescription())){
+            msg.description = vo.getDescription();
+        }
+        if(bitmap != null){
+            msg.thumbData = Utils.bmpToByteArray(bitmap, true);
+        }
+
+        SendMessageToWX.Req req = new SendMessageToWX.Req();
+        req.transaction = buildTransaction("video");
+        req.message = msg;
+        req.scene = vo.getScene();
+        api.sendReq(req);
+
+    }
+
+    /**
 	 *
 	 * @param scene
 	 *            发送场景，0 微信， 1 朋友圈
