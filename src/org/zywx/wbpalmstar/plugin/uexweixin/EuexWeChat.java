@@ -167,6 +167,9 @@ public class EuexWeChat extends EUExBase {
 	}
 
 	private void init() {
+		if(weChatCallBack != null) {
+		    return;
+		}
 		weChatCallBack = new WeChatCallBack() {
 			@Override
 			public void callBackPayResult(BaseResp msg) {
