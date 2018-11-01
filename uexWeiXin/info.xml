@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexWeiXin" version="4.0.5" build = "5">
-        <info>5:新增分享视频和分享音乐接口</info>
+    <plugin uexName="uexWeiXin" version="4.0.6" build = "6">
+        <info>6:修复微信回调多次初始化导致，回调错乱</info>
+        <build>5:新增分享视频和分享音乐接口</build>
         <build>4:修复回调参数不对的问题</build>
         <build>3:统一回调参数为json对象</build>
         <build>2:升级SDK，修复不能上架Google Play的问题</build>
