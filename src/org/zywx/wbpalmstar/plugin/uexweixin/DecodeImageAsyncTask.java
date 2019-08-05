@@ -1,5 +1,6 @@
 package org.zywx.wbpalmstar.plugin.uexweixin;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,17 +32,33 @@ public class DecodeImageAsyncTask extends AsyncTask<String, Void, Bitmap> {
             try {
                 bmp = BitmapFactory.decodeStream(new URL(url)
                         .openStream());
-            } catch (Exception e) {
-                Toast.makeText(mContext, "错误：" + e.getMessage(),
-                        Toast.LENGTH_SHORT).show();
+            } catch (final Exception e) {
+
+                ((Activity)mContext).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(mContext, "错误：" + e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+
                 e.printStackTrace();
+                return null;
             }
         } else {
             if (url.startsWith("/")) {// sd卡路径时
                 File f = new File(url);
                 if (!f.exists()) {
-                    Toast.makeText(mContext, "File is not exist!",
-                            Toast.LENGTH_SHORT).show();
+                    ((Activity)mContext).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(mContext, "File is not exist!",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                    return null;
+
                 }
                 bmp = BitmapFactory.decodeFile(url);
             } else {
@@ -63,6 +80,9 @@ public class DecodeImageAsyncTask extends AsyncTask<String, Void, Bitmap> {
     @Override
     protected void onPostExecute(Bitmap bitmap) {
         super.onPostExecute(bitmap);
-        feedback.onFeedback(bitmap);
+        if(bitmap!=null) {
+            feedback.onFeedback(bitmap);
+        }
+
     }
 }
