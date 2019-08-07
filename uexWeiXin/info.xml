@@ -1,7 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexWeiXin" version="4.0.6" build = "6">
-        <info>6:修复微信回调多次初始化导致，回调错乱</info>
+    <plugin uexName="uexWeiXin" version="4.3.8" build = "8">
+        <info>8:微信图片分享，缩率图不存在导致崩溃的问题</info>
+        <build>7:安全检测,修改请求方式增加https验证</build>
+        <build>6:修复微信回调多次初始化导致，回调错乱</build>
         <build>5:新增分享视频和分享音乐接口</build>
         <build>4:修复回调参数不对的问题</build>
         <build>3:统一回调参数为json对象</build>

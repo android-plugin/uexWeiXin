@@ -8,175 +8,101 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.util.Log;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.HttpVersion;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
-import org.zywx.wbpalmstar.base.BDebug;
+import org.apache.commons.io.IOUtils;
+import org.zywx.wbpalmstar.platform.certificates.Http;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.security.KeyManagementException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
-import java.security.cert.X509Certificate;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import java.util.zip.GZIPInputStream;
 
 public class Utils {
-	
+
 	private static final String TAG = "Utils";
-	
+	private static final int OK = 200;
+
 	public static byte[] httpGet(final String url) {
 		if (url == null || url.length() == 0) {
 			Log.e(TAG, "httpGet, url is null");
 			return null;
 		}
-
-		HttpClient httpClient = getNewHttpClient();
-		HttpGet httpGet = new HttpGet(url);
-
+		HttpURLConnection httpURLConnection;
 		try {
-			HttpResponse resp = httpClient.execute(httpGet);
-			if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-				Log.e(TAG, "httpGet fail, status code = " + resp.getStatusLine().getStatusCode());
+			httpURLConnection=Http.getHttpsURLConnection(url);
+			httpURLConnection.setRequestMethod("GET");
+			httpURLConnection.connect();
+			int responseCode = httpURLConnection.getResponseCode();
+			if (responseCode != OK) {
+				Log.e(TAG, "httpGet fail, status code = " +responseCode);
 				return null;
 			}
-
-			return EntityUtils.toByteArray(resp.getEntity());
-
+			return toByteArray(httpURLConnection);
 		} catch (Exception e) {
 			Log.e(TAG, "httpGet exception, e = " + e.getMessage());
 			e.printStackTrace();
 			return null;
 		}
 	}
-	
+
+	private static byte[] toByteArray(HttpURLConnection conn) throws Exception {
+		if (null == conn) {
+			return new byte[]{};
+		}
+		InputStream mInStream = conn.getInputStream();
+		if (mInStream == null) {
+			return new byte[]{};
+		}
+		long len = conn.getContentLength();
+		if (len > Integer.MAX_VALUE) {
+			throw new Exception(
+					"HTTP entity too large to be buffered in memory");
+		}
+		String contentEncoding = conn.getContentEncoding();
+		if (null != contentEncoding) {
+			if ("gzip".equalsIgnoreCase(contentEncoding)) {
+				mInStream = new GZIPInputStream(mInStream, 2048);
+			}
+		}
+		return IOUtils.toByteArray(mInStream);
+	}
 	public static byte[] httpPost(String url, String entity) {
 		if (url == null || url.length() == 0) {
 			Log.e(TAG, "httpPost, url is null");
 			return null;
 		}
-		
-		HttpClient httpClient = getNewHttpClient();
-		
-		HttpPost httpPost = new HttpPost(url);
-		
+		OutputStream out = null; //写
+		HttpURLConnection httpURLConnection;
 		try {
-			httpPost.setEntity(new StringEntity(entity));
-			httpPost.setHeader("Accept", "application/json");
-			httpPost.setHeader("Content-type", "application/json");
-			
-			HttpResponse resp = httpClient.execute(httpPost);
-			if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-				Log.e(TAG, "httpGet fail, status code = " + resp.getStatusLine().getStatusCode());
+			httpURLConnection=Http.getHttpsURLConnection(url);
+			httpURLConnection.setRequestMethod("POST");
+			httpURLConnection.setRequestProperty("Accept", "application/json");
+			httpURLConnection.setRequestProperty("Content-type", "application/json");
+			httpURLConnection.setUseCaches(false);
+			httpURLConnection.setDoOutput(true);
+			httpURLConnection.setDoInput(true);
+			httpURLConnection.setConnectTimeout(30000); //30秒连接超时
+			httpURLConnection.setReadTimeout(30000);    //30秒读取超时
+			//传入参数
+			out = httpURLConnection.getOutputStream();
+			out.write(entity.getBytes());
+			out.flush(); //清空缓冲区,发送数据
+			out.close();
+			httpURLConnection.connect();
+			int responseCode = httpURLConnection.getResponseCode();
+			if (responseCode != OK) {
+				Log.e(TAG, "httpURLConnection fail, status code = " + responseCode);
 				return null;
 			}
-
-			return EntityUtils.toByteArray(resp.getEntity());
+			return toByteArray(httpURLConnection);
 		} catch (Exception e) {
-			Log.e(TAG, "httpPost exception, e = " + e.getMessage());
+			Log.e(TAG, "httpURLConnection exception, e = " + e.getMessage());
 			e.printStackTrace();
 			return null;
 		}
 	}
-
-	private static HttpClient getNewHttpClient() { 
-		   try { 
-		       KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType()); 
-		       trustStore.load(null, null); 
-
-		       SSLSocketFactory sf = new SSLSocketFactoryEx(trustStore); 
-		       sf.setHostnameVerifier(SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER); 
-
-		       HttpParams params = new BasicHttpParams(); 
-		       HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1); 
-		       HttpProtocolParams.setContentCharset(params, HTTP.UTF_8); 
-
-		       SchemeRegistry registry = new SchemeRegistry(); 
-		       registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80)); 
-		       registry.register(new Scheme("https", sf, 443)); 
-
-		       ClientConnectionManager ccm = new ThreadSafeClientConnManager(params, registry); 
-
-		       return new DefaultHttpClient(ccm, params); 
-		   } catch (Exception e) { 
-		       return new DefaultHttpClient(); 
-		   } 
-		}
-	
-	private static class SSLSocketFactoryEx extends SSLSocketFactory {      
-	      
-	    SSLContext sslContext = SSLContext.getInstance("TLS");      
-	      
-	    public SSLSocketFactoryEx(KeyStore truststore) throws NoSuchAlgorithmException, KeyManagementException, KeyStoreException, UnrecoverableKeyException {      
-	        super(truststore);      
-
-
-	        final TrustManager tm = new X509TrustManager() {
-	      
-	            public X509Certificate[] getAcceptedIssuers() {      
-	                return null;      
-	            }      
-	      
-				@Override
-				public void checkClientTrusted(X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
-					try {
-						chain[0].checkValidity();
-					} catch (Exception e) {
-						BDebug.e("Certificate not valid or trusted.");
-					}
-
-				}
-
-				@Override
-				public void checkServerTrusted(X509Certificate[] chain,	String authType) throws java.security.cert.CertificateException {
-					try {
-						chain[0].checkValidity();
-					} catch (Exception e) {
-						BDebug.e("Certificate not valid or trusted.");
-					}
-
-				}
-	        };      
-	      
-	        sslContext.init(null, new TrustManager[] { tm }, null);      
-	    }      
-	      
-		@Override
-		public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException, UnknownHostException {
-			return sslContext.getSocketFactory().createSocket(socket, host,	port, autoClose);
-		}
-
-		@Override
-		public Socket createSocket() throws IOException {
-			return sslContext.getSocketFactory().createSocket();
-		} 
-	}  
-	
 	public static byte[] streamToByteArray(InputStream in) {
 		if (in == null) {
 			return null;
@@ -215,7 +141,7 @@ public class Utils {
 		}
 		return result;
 	}
-	
+
 	public static AlertDialog showAlert(Context ctx, final String title, final String message, final String label, DialogInterface.OnClickListener listener)
 	{
 		AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
@@ -226,12 +152,12 @@ public class Utils {
 		alert.show();
 		return alert;
 	}
-	
+
 	public static String getAppId(Context ctx){
 		SharedPreferences prefs = ctx.getSharedPreferences("appId", Context.MODE_PRIVATE);
 		return prefs.getString("appId", null);
 	}
-	
+
 	public static void setAppId(Context ctx, String appId)
 	{
 		SharedPreferences prefs = ctx.getSharedPreferences("appId", Context.MODE_PRIVATE);
@@ -244,13 +170,13 @@ public class Utils {
 		if (str == null || str.length() == 0) {
 			return null;
 		}
-		
+
 		char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
-		
+
 		try {
 			MessageDigest mdTemp = MessageDigest.getInstance("SHA1");
 			mdTemp.update(str.getBytes());
-			
+
 			byte[] md = mdTemp.digest();
 			int j = md.length;
 			char buf[] = new char[j * 2];
@@ -266,6 +192,4 @@ public class Utils {
 			return null;
 		}
 	}
-
-
 }
