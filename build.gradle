@@ -2,9 +2,10 @@ apply plugin: 'com.android.application'
 buildscript {
     repositories {
         jcenter()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:3.0.1'
     }
 }
 
@@ -15,26 +16,46 @@ repositories {
     flatDir {
         dirs 'libs'
     }
+    jcenter()
+    google()
     maven {
         url 'https://raw.githubusercontent.com/android-plugin/mvn-repo/master/'
     }
 }
 dependencies {
-    compile fileTree(dir: 'libs', include: '*.jar')
-    compile ('org.appcan:engine:+:systemRelease@aar')
+    implementation fileTree(dir: 'libs', include: '*.jar')
+    implementation ('org.appcan:engine:4.4.27')
+    implementation 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.6.4'
 }
 
 android {
     signingConfigs {
         config {
-            keyAlias 'fetchgo.keystore'
-            keyPassword 'abc123_'
-            storeFile file('fetchgo.keystore')
-            storePassword 'abc123_'
+            keyAlias 'appcancn'
+            keyPassword 'zhengyiwuxian'
+            storeFile file('AppCanCN.keystore')
+            storePassword 'zhengyiwuxian'
         }
     }
-    compileSdkVersion 22
-    buildToolsVersion "23.0.0"
+
+    compileSdkVersion 28
+
+    useLibrary 'org.apache.http.legacy'
+
+    defaultConfig {
+        minSdkVersion 18
+        targetSdkVersion 28
+        signingConfig signingConfigs.config
+        applicationId  'org.zywx.wbpalmstar.widgetone.uexweixin.nativetest'
+        multiDexEnabled  true
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.config
+        }
+    }
+
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -46,36 +67,12 @@ android {
             assets.srcDirs = ['assets']
             jniLibs.srcDirs = ['libs']
         }
+    }
 
-        // Move the tests to tests/java, tests/res, etc...
-        instrumentTest.setRoot('tests')
+    packagingOptions {
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/LICENSE.txt'
+    }
 
-        // Move the build types to build-types/<type>
-        // For instance, build-types/debug/java, build-types/debug/AndroidManifest.xml, ...
-        // This moves them out of them default location under src/<type>/... which would
-        // conflict with src/ being used by the main source set.
-        // Adding new build types or product flavors should be accompanied
-        // by a similar customization.
-        debug.setRoot('build-types/debug')
-        release.setRoot('build-types/release')
-    }
-    android {
-        packagingOptions {
-            exclude 'META-INF/NOTICE.txt'
-            exclude 'META-INF/LICENSE.txt'
-        }
-    }
-    defaultConfig {
-        signingConfig signingConfigs.config
-        applicationId  'com.zy.fetchgo'
-        multiDexEnabled  true
-    }
-    productFlavors {
-    }
-    buildTypes {
-        debug {
-            signingConfig signingConfigs.config
-        }
-    }
 }
 apply from: "https://raw.githubusercontent.com/android-plugin/gradle-plugin/master/buildPlugin.gradle"
