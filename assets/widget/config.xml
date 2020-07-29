@@ -5,7 +5,7 @@
 	<author email=""> </author>
 	<icon src="icon.png"/>
 	<license href=""/>
-	<content encoding="utf-8" src="index.html"/>
+	<content encoding="utf-8" src="uexWeiXin.html"/>
 	<updateurl/>
 	<logserverip/> 
 	<showmyspace>false</showmyspace>
