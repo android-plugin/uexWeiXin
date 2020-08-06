@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.Toast;
 
 import org.zywx.wbpalmstar.plugin.uexweixin.utils.IFeedback;
@@ -17,8 +18,13 @@ import java.net.URL;
  * Created by fred on 16/11/29.
  */
 public class DecodeImageAsyncTask extends AsyncTask<String, Void, Bitmap> {
+
+    private static final String TAG = "DecodeImageAsyncTask";
+    
     private IFeedback<Bitmap> feedback;
+
     private Context mContext;
+
     public DecodeImageAsyncTask(Context context, IFeedback<Bitmap> feedback) {
         this.mContext = context;
         this.feedback = feedback;
@@ -70,19 +76,22 @@ public class DecodeImageAsyncTask extends AsyncTask<String, Void, Bitmap> {
                 }
             }
         }
-        //thumb的尺寸是100，和以前的逻辑保持一致
-        final int THUMB_SIZE = 100;
-        Bitmap thumbBmp = Bitmap.createScaledBitmap(bmp, THUMB_SIZE,
-                THUMB_SIZE, true);
-        return thumbBmp;
+        if (bmp != null){
+            //thumb的尺寸是100，和以前的逻辑保持一致
+            final int THUMB_SIZE = 100;
+            Bitmap thumbBmp = Bitmap.createScaledBitmap(bmp, THUMB_SIZE,
+                    THUMB_SIZE, true);
+            return thumbBmp;
+        }else{
+            return null;
+        }
     }
 
     @Override
     protected void onPostExecute(Bitmap bitmap) {
         super.onPostExecute(bitmap);
-        if(bitmap!=null) {
-            feedback.onFeedback(bitmap);
-        }
+
+        feedback.onFeedback(bitmap);
 
     }
 }

@@ -1167,15 +1167,27 @@ public class EuexWeChat extends EUExBase {
         new DecodeImageAsyncTask(mContext, new IFeedback<Bitmap>() {
             @Override
             public void onFeedback(Bitmap bitmap) {
-                WXMediaMessage msg = new WXMediaMessage();
-                msg.thumbData = Utils.bmpToByteArray(bitmap, true);
-                msg.mediaObject = imgObj;
+            	if (bitmap != null){
+					try {
+						WXMediaMessage msg = new WXMediaMessage();
+						msg.thumbData = Utils.bmpToByteArray(bitmap, true);
+						msg.mediaObject = imgObj;
 
-                SendMessageToWX.Req req = new SendMessageToWX.Req();
-                req.transaction = buildTransaction("img");
-                req.message = msg;
-                req.scene = scene;
-                api.sendReq(req);
+						SendMessageToWX.Req req = new SendMessageToWX.Req();
+						req.transaction = buildTransaction("img");
+						req.message = msg;
+						req.scene = scene;
+						api.sendReq(req);
+					} catch (Exception e) {
+						e.printStackTrace();
+						// 图片解析失败，将错误返回
+						weChatCallBack.callBackShareResult(1);
+					}
+				}else{
+            		// 图片解析失败，将错误返回
+					Log.e(TAG, "DecodeImageAsyncTask==onFeedback==>解析失败，shareImage无法分享");
+					weChatCallBack.callBackShareResult(1);
+				}
             }
         }).execute(thumbPath);
 //
@@ -1245,7 +1257,12 @@ public class EuexWeChat extends EUExBase {
                 new DecodeImageAsyncTask(mContext, new IFeedback<Bitmap>() {
                     @Override
                     public void onFeedback(Bitmap bitmap) {
-                        shareVideo(dataVO,bitmap);
+                    	if (bitmap != null){
+							shareVideo(dataVO,bitmap);
+						}else{
+							// 图片解析失败，将错误返回
+							Log.e(TAG, "DecodeImageAsyncTask==onFeedback==>解析失败，shareVideo无法分享");
+						}
                     }
                 }).execute(thumbPath);
             }
@@ -1279,7 +1296,12 @@ public class EuexWeChat extends EUExBase {
                 new DecodeImageAsyncTask(mContext, new IFeedback<Bitmap>() {
                     @Override
                     public void onFeedback(Bitmap bitmap) {
-                        shareMusic(dataVO,bitmap);
+                    	if (bitmap != null){
+							shareMusic(dataVO,bitmap);
+						}else{
+							// 图片解析失败，将错误返回
+							Log.e(TAG, "DecodeImageAsyncTask==onFeedback==>解析失败，shareMusic无法分享");
+						}
                     }
                 }).execute(thumbPath);
             }
@@ -1373,7 +1395,8 @@ public class EuexWeChat extends EUExBase {
 	 */
 	public void shareLink(final int scene, final String thumbImgPath,
 			final String title, final String description, final String wedpageUrl) {
-		if (wedpageUrl == null || wedpageUrl.length() == 0) {
+		if (wedpageUrl == null || wedpageUrl.length() == 0 || api == null) {
+			weChatCallBack.callBackShareResult(1);
 			return;
 		}
 
@@ -1385,19 +1408,24 @@ public class EuexWeChat extends EUExBase {
         new DecodeImageAsyncTask(mContext, new IFeedback<Bitmap>() {
             @Override
             public void onFeedback(Bitmap bitmap) {
-                WXMediaMessage msg = new WXMediaMessage();
-                msg.thumbData = Utils.bmpToByteArray(bitmap, true);
-                msg.title = title;
-                msg.description = description;
-                WXWebpageObject webObj = new WXWebpageObject();
-                webObj.webpageUrl = wedpageUrl;
-                msg.mediaObject = webObj;
+            	if (bitmap != null){
+					WXMediaMessage msg = new WXMediaMessage();
+					msg.thumbData = Utils.bmpToByteArray(bitmap, true);
+					msg.title = title;
+					msg.description = description;
+					WXWebpageObject webObj = new WXWebpageObject();
+					webObj.webpageUrl = wedpageUrl;
+					msg.mediaObject = webObj;
 
-                SendMessageToWX.Req req = new SendMessageToWX.Req();
-                req.transaction = buildTransaction("link");
-                req.message = msg;
-                req.scene = scene;
-                api.sendReq(req);
+					SendMessageToWX.Req req = new SendMessageToWX.Req();
+					req.transaction = buildTransaction("link");
+					req.message = msg;
+					req.scene = scene;
+					api.sendReq(req);
+				}else{
+					// 图片解析失败，将错误返回
+					Log.e(TAG, "DecodeImageAsyncTask==onFeedback==>解析失败，shareLink无法分享");
+				}
             }
         }).execute(thumbPath);
 	}

@@ -4,15 +4,15 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport"
           content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, user-scalable=no" />
-    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <link rel="stylesheet" type="text/css" href="css/index1.css">
 
     <title>微信功能</title>
     <script type="text/javascript">
     var cText = 0;
     var cJson = 1;
     var cInt = 2;
-    var appId = "wxa7aa49a8e7771458";
-    var app_serect = "0e857460d1b309130b9b1d2530ac094d";
+    var appId = "wxcb60063171d6b794";
+    var app_serect = "93eb0eeaf647e62285630c8932f5ff4f";
     var app_key = "L8LrMqqeGRxST5reouB0K66CaYAWpqhAVsq7ggKkxHCOastWksvuX1uvmvQclxaHoYd3ElNBrNO2DHnnzgfVG9Qs473M3DTOZug5er46FhuGofumV8H2FVR9qkjSlC5K";
     var partnerId = "1900000109";
     var traceId = "crestxu_test";
@@ -42,8 +42,18 @@
     }
    	function shareLinkContent(){
         var type = document.getElementById("type").value;
-        var jsonstr = '{"thumbImg":"res://icon.png","wedpageUrl":"http://www.appcan.cn","scene":"'+type+'","title":"你好,我是AppCan","description":"中国最大的移动中间键平台AppCan对微信分享的图片支持测试"}';
-        uexWeiXin.shareLinkContent(jsonstr, cbShareLinkContent);
+        var JsonData = '{"thumbImg":"res://icon.png","wedpageUrl":"http://www.appcan.cn","scene":"'+type+'","title":"你好,我是AppCan","description":"中国最大的移动中间键平台AppCan对微信分享的图片支持测试"}';
+        //uexWeiXin.shareLinkContent(jsonstr, cbShareLinkContent);
+        //var JsonData = '{"thumbImg":"res://icon.png","wedpageUrl":"http://dqmip.com","scene":1,"title":"测试测试555","description":"123"}';
+	uexWeiXin.shareLinkContent(JsonData,function(error){
+			if(error==0){
+				 uexWindow.toast(0,5,"分享成功!",2000);
+				 //closeWeixin();
+			}else{
+				 uexWindow.toast(0,5,"分享失败!",2000);
+				 //closeWeixin();
+			}
+		});
     }
 
     /*-----------微信登录---------*/
