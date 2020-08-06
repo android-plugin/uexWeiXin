@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
@@ -17,6 +18,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.security.MessageDigest;
+import java.util.Collections;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 public class Utils {
@@ -164,6 +167,35 @@ public class Utils {
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putString("appId", appId);
 		editor.commit();
+	}
+
+	public static String sha1(List<String> stringList) {
+		if (stringList == null || stringList.size() == 0) {
+			return null;
+		}
+		Collections.sort(stringList); // 按照字典顺序排序
+		char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+		try {
+			MessageDigest mdTemp = MessageDigest.getInstance("SHA1");
+			for (String data : stringList) {
+				if (!TextUtils.isEmpty(data)) {
+					mdTemp.update(data.getBytes());
+				}
+			}
+			byte[] md = mdTemp.digest();
+			int j = md.length;
+			char[] buf = new char[j * 2];
+			int k = 0;
+			for (int i = 0; i < j; i++) {
+				byte byte0 = md[i];
+				buf[k++] = hexDigits[byte0 >>> 4 & 0xf];
+				buf[k++] = hexDigits[byte0 & 0xf];
+			}
+			return new String(buf);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public static String sha1(String str) {

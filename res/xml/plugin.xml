@@ -27,6 +27,9 @@
         <method name="getPrepayId"/>
         <method name="startPay"/>
 
+        <method name="openMiniProgram"/>
+        <method name="openChooseInvoice"/>
+
         <method name="login"/>
         <method name="getLoginAccessToken"/>
         <method name="getLoginRefreshAccessToken"/>

@@ -8,6 +8,8 @@ import android.util.Log;
 import com.tencent.mm.opensdk.constants.ConstantsAPI;
 import com.tencent.mm.opensdk.modelbase.BaseReq;
 import com.tencent.mm.opensdk.modelbase.BaseResp;
+import com.tencent.mm.opensdk.modelbiz.ChooseCardFromWXCardPackage;
+import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
@@ -24,17 +26,24 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		api = WXAPIFactory.createWXAPI(this, Utils.getAppId(this));
-		api.registerApp(Utils.getAppId(this));
-		api.handleIntent(getIntent(), this);
-
+		try {
+			api = WXAPIFactory.createWXAPI(this, Utils.getAppId(this));
+			api.registerApp(Utils.getAppId(this));
+			api.handleIntent(getIntent(), this);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	protected void onNewIntent(Intent intent) {
 		super.onNewIntent(intent);
-		setIntent(intent);
-		api.handleIntent(getIntent(), this);
+		try {
+			setIntent(intent);
+			api.handleIntent(getIntent(), this);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -93,6 +102,19 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
                 EuexWeChat.weChatCallBack.backLoginResult(resp);
             }
         }
+
+		if (resp.getType() == ConstantsAPI.COMMAND_LAUNCH_WX_MINIPROGRAM
+				&& resp instanceof WXLaunchMiniProgram.Resp) {
+			if (EuexWeChat.weChatCallBack != null){
+				EuexWeChat.weChatCallBack.callbackMiniProgram(resp);
+			}
+		}
+
+		if (resp.getType() == ConstantsAPI.COMMAND_CHOOSE_CARD_FROM_EX_CARD_PACKAGE && resp instanceof ChooseCardFromWXCardPackage.Resp) {
+			if (EuexWeChat.weChatCallBack != null){
+				EuexWeChat.weChatCallBack.callbackChooseCard(resp);
+			}
+		}
 
 		finish();
 	}
