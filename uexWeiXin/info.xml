@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexWeiXin" version="4.3.9" build="2020072901">
-        <info>9:升级微信SDK版本至6.6.4，并修复和优化了若干内部逻辑，增强稳定性</info>
+    <plugin uexName="uexWeiXin" version="4.3.10" build="2020080601">
+        <info>=10:增加打开微信小程序功能以及打开微信选择发票的功能</info>
+        <build>9:升级微信SDK版本至6.6.4，并修复和优化了若干内部逻辑，增强稳定性</build>
         <build>8:微信图片分享，缩率图不存在导致崩溃的问题</build>
         <build>7:安全检测,修改请求方式增加https验证</build>
         <build>6:修复微信回调多次初始化导致，回调错乱</build>

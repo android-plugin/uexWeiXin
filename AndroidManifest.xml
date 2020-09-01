@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.zywx.wbpalmstar.widgetone.uexweixin"
+    package="org.zywx.wbpalmstar.widgetone.uexweixin.nativetest"
     android:versionCode="100"
     android:versionName="3.0.0"
     android:installLocation="internalOnly">
@@ -23,6 +23,18 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".wxapi.WXEntryActivity"
+            android:exported="true"
+            android:theme="@style/plugin_uexweixin_Transparent"
+            android:launchMode="singleTop" >
+        </activity>
+        <activity
+            android:name=".wxapi.WXPayEntryActivity"
+            android:exported="true"
+            android:theme="@style/plugin_uexweixin_Transparent"
+            android:launchMode="singleTop" >
         </activity>
     </application>
 

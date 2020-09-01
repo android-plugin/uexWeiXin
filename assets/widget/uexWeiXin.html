@@ -143,6 +143,22 @@
         uexWeiXin.setCallbackWindowName(JSON.stringify(params));
     }
 
+    function openMiniProgram(){
+        var params = {
+            userName:"gh_d43f693ca31f@app",
+            path:"",
+            miniProgramType:"0"
+        };
+        uexWeiXin.openMiniProgram(JSON.stringify(params));
+    }
+
+    function openChooseInvoice(){
+        uexWeiXin.openChooseInvoice({}, function(data){
+            console.log("openChooseInvoice: " + JSON.stringify(data));
+            alert("openChooseInvoice: " + JSON.stringify(data))
+        });
+    }
+
 </script>
 </head>
 
@@ -192,6 +208,14 @@
         <span>将第二步生成的 prepayId 作为参数,调用微信 sdk 发送支付请求到微信。</span>
         <input class="btn" type="button" value="调微信支付" onclick="gotoPay()">-->
         <input class="btn" type="button" value="进入支付" onclick="openNewWin()">
+
+        <span>6.打开微信小程序</span>
+
+        <input class="btn" type="button" value="打开微信小程序" onclick="openMiniProgram()">
+
+        <span>7.打开微信发票</span>
+
+        <input class="btn" type="button" value="打开微信发票" onclick="openChooseInvoice()">
 
     </div>
 </div>

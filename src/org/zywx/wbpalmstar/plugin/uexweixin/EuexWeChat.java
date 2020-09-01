@@ -15,6 +15,8 @@ import android.widget.Toast;
 
 import com.tencent.mm.opensdk.constants.Build;
 import com.tencent.mm.opensdk.modelbase.BaseResp;
+import com.tencent.mm.opensdk.modelbiz.ChooseCardFromWXCardPackage;
+import com.tencent.mm.opensdk.modelbiz.WXLaunchMiniProgram;
 import com.tencent.mm.opensdk.modelmsg.SendAuth;
 import com.tencent.mm.opensdk.modelmsg.SendMessageToWX;
 import com.tencent.mm.opensdk.modelmsg.WXImageObject;
@@ -29,6 +31,7 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
@@ -43,6 +46,8 @@ import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginCheckTokenVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginRefreshTokenVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginResultVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginVO;
+import org.zywx.wbpalmstar.plugin.uexweixin.VO.OpenChooseInvoiceVO;
+import org.zywx.wbpalmstar.plugin.uexweixin.VO.OpenMiniProgramVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.PayDataVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.PrePayDataVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.ShareMusicVO;
@@ -55,6 +60,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -103,7 +109,7 @@ public class EuexWeChat extends EUExBase {
     private static final int SHARE_MUSIC_CONTENT_CODE = 7;
 	private static IWXAPI api;
 	public static WeChatCallBack weChatCallBack;
-	private String appId;
+	private static String appId;
 	private long timeStamp;
 	private String nonceStr;
 
@@ -140,6 +146,7 @@ public class EuexWeChat extends EUExBase {
     private String startPayFuncId;
     private String getAccessTokenFunId;
     private String getAccessTokenLocalFunId;
+    private String openChooseInvoiceFuncId;
 
 
 	public EuexWeChat(Context context, EBrowserView parent) {
@@ -265,6 +272,35 @@ public class EuexWeChat extends EUExBase {
                             msg.errCode + "");
                 }
 			}
+
+			@Override
+			public void callbackMiniProgram(BaseResp msg) {
+				WXLaunchMiniProgram.Resp launchMiniProResp = (WXLaunchMiniProgram.Resp) msg;
+				String extraData = launchMiniProResp.extMsg; //对应小程序组件 <button open-type="launchApp"> 中的 app-parameter 属性
+				// TODO 未处理小程序调用原生App时的传参，后期有需要再定义回调开发。
+				Log.i(TAG, "callbackMiniProgram: " + extraData);
+			}
+
+			@Override
+			public void callbackChooseCard(BaseResp msg) {
+				ChooseCardFromWXCardPackage.Resp chooseCardFromWXCardPackage = (ChooseCardFromWXCardPackage.Resp) msg;
+				if(null != openChooseInvoiceFuncId) {
+					try {
+						JSONObject obj = new JSONObject();
+						obj.put("errCode", msg.errCode);
+						obj.put("errStr", msg.errStr);
+						try {
+							JSONArray cardArrayJson = new JSONArray(chooseCardFromWXCardPackage.cardItemList);
+							obj.put("cardAry", cardArrayJson);
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+						callbackToJs(Integer.parseInt(openChooseInvoiceFuncId), false, obj);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
 		};
 	}
 
@@ -278,10 +314,14 @@ public class EuexWeChat extends EUExBase {
 			return EUExCallback.F_C_FAILED;
 		}
 		appId = data[0];
+		if (data.length >= 2){
+			// iOS使用的参数， Android暂时无用
+			String universalLink = data[1];
+		}
 		if (appId == null || appId.length() == 0) {
 			return EUExCallback.F_C_FAILED;
 		}
-		api = WXAPIFactory.createWXAPI(mContext, appId, false);
+		api = WXAPIFactory.createWXAPI(mContext, appId, true);
 		boolean regOk = api.registerApp(appId);
 		if (regOk) {
 			Utils.setAppId(mContext, appId);
@@ -1092,6 +1132,10 @@ public class EuexWeChat extends EUExBase {
 
 		void backLoginResult(BaseResp msg);
 
+		void callbackMiniProgram(BaseResp msg);
+
+		void callbackChooseCard(BaseResp msg);
+
 	}
 
 	public boolean shareTextContent(String[] params) {
@@ -1563,6 +1607,69 @@ public class EuexWeChat extends EUExBase {
 			e.printStackTrace();
 		}
     }
+
+	/**
+	 * 打开小程序
+	 *
+	 * @param params
+	 */
+    public void openMiniProgram(String[] params){
+		if (params == null || params.length < 1) {
+			errorCallback(0, 0, "error params!");
+			return;
+		}
+		String json = params[0];
+		try {
+			OpenMiniProgramVO openMiniProgramVO = DataHelper.gson.fromJson(json, OpenMiniProgramVO.class);
+
+			WXLaunchMiniProgram.Req req = new WXLaunchMiniProgram.Req();
+			req.userName = openMiniProgramVO.getUserName(); // 填小程序原始id
+			req.path = openMiniProgramVO.getPath();                  ////拉起小程序页面的可带参路径，不填默认拉起小程序首页，对于小游戏，可以只传入 query 部分，来实现传参效果，如：传入 "?foo=bar"。
+			// 可选打开 开发版，体验版和正式版
+			if (openMiniProgramVO.checkMiniProgramType(OpenMiniProgramVO.MINI_PROGRAME_TYPE_RELEASE)){
+				req.miniprogramType = WXLaunchMiniProgram.Req.MINIPTOGRAM_TYPE_RELEASE;
+			} else if (openMiniProgramVO.checkMiniProgramType(OpenMiniProgramVO.MINI_PROGRAME_TYPE_PREVIEW)){
+				req.miniprogramType = WXLaunchMiniProgram.Req.MINIPROGRAM_TYPE_PREVIEW;
+			} else if (openMiniProgramVO.checkMiniProgramType(OpenMiniProgramVO.MINI_PROGRAME_TYPE_TEST)){
+				req.miniprogramType = WXLaunchMiniProgram.Req.MINIPROGRAM_TYPE_TEST;
+			}
+			api.sendReq(req);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void openChooseInvoice(String[] params){
+		if (params == null || params.length < 1) {
+			errorCallback(0, 0, "error params!");
+			return;
+		}
+		if (params.length >= 2){
+			openChooseInvoiceFuncId = params[1];
+		}
+		String json = params[0];
+		try {
+			List<String> paramList = new ArrayList<>();
+			ChooseCardFromWXCardPackage.Req req = new ChooseCardFromWXCardPackage.Req();
+			String timestampStr = String.valueOf(System.currentTimeMillis());
+			nonceStr = genNonceStr();
+			req.appId = appId;
+			paramList.add(req.appId);
+			req.cardType = "INVOICE";//发票类型填写 INVOICE
+			paramList.add(req.cardType);
+			req.nonceStr = nonceStr;
+			paramList.add(req.nonceStr);
+			req.timeStamp = timestampStr;
+			paramList.add(req.timeStamp);
+			req.signType = "SHA1"; // 微信文档写的是目前仅支持SHA1
+			String cardSign = Utils.sha1(paramList);
+			req.cardSign = cardSign;
+			api.sendReq(req);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
     public void login(String[] params) {
         if (params == null || params.length < 1) {
             errorCallback(0, 0, "error params!");
