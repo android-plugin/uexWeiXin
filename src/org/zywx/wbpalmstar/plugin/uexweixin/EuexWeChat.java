@@ -46,7 +46,6 @@ import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginCheckTokenVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginRefreshTokenVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginResultVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginVO;
-import org.zywx.wbpalmstar.plugin.uexweixin.VO.OpenChooseInvoiceVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.OpenMiniProgramVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.PayDataVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.PrePayDataVO;
@@ -61,9 +60,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 @SuppressLint("SdCardPath")
 public class EuexWeChat extends EUExBase {
@@ -108,7 +110,20 @@ public class EuexWeChat extends EUExBase {
     private static final int SHARE_VIDEO_CONTENT_CODE = 6;
     private static final int SHARE_MUSIC_CONTENT_CODE = 7;
 	private static IWXAPI api;
+	/**
+	 * root页面的回调对象
+	 */
 	public static WeChatCallBack weChatCallBack;
+	/**
+	 * 当前页面的微信回调
+	 */
+	private WeChatCallBack currentPageWeChatCallBack;
+	/**
+	 * 用于保存所有正在进行等待接收回调的操作所对应的callback对象。
+	 * key为随机生成的的UUID，会被放入微信SDK的请求实体的transaction属性中，而在微信SDK的响应实体中的transaction属性会与之一一对应，从而实现一一对应的回调。
+	 * value即为WeChatCallBack对象。
+	 */
+	private static Map<String, WeChatCallBack> weChatCallBackMap = new HashMap<>();
 	private static String appId;
 	private long timeStamp;
 	private String nonceStr;
@@ -148,6 +163,26 @@ public class EuexWeChat extends EUExBase {
     private String getAccessTokenLocalFunId;
     private String openChooseInvoiceFuncId;
 
+	/**
+	 * 详见weChatCallBackMap属性的注释。
+	 */
+    private String registerNewUUIDTransactionOfWeChatCallback(String tag){
+    	String transactionId = tag + "-" + UUID.randomUUID().toString();
+    	weChatCallBackMap.put(transactionId, currentPageWeChatCallBack);
+    	return transactionId;
+	}
+
+	/**
+	 * 详见weChatCallBackMap属性的注释。
+	 */
+	public static WeChatCallBack getAndRemoveWeChatCallbackWithUUIDTransaction(String transactionId){
+		WeChatCallBack callBack = weChatCallBackMap.get(transactionId);
+		weChatCallBackMap.remove(transactionId);
+		if (callBack == null){
+			callBack = weChatCallBack;
+		}
+		return callBack;
+	}
 
 	public EuexWeChat(Context context, EBrowserView parent) {
 		super(context, parent);
@@ -174,10 +209,7 @@ public class EuexWeChat extends EUExBase {
 	}
 
 	private void init() {
-		if(weChatCallBack != null) {
-		    return;
-		}
-		weChatCallBack = new WeChatCallBack() {
+		currentPageWeChatCallBack = new WeChatCallBack() {
 			@Override
 			public void callBackPayResult(BaseResp msg) {
                 callbackOldInterface(CB_GET_PAY_RESULT, 0, EUExCallback.F_C_JSON,
@@ -302,6 +334,11 @@ public class EuexWeChat extends EUExBase {
 				}
 			}
 		};
+		// 兼容延续之前的老逻辑，继续保存root页面的回调对象
+		if(weChatCallBack != null) {
+			return;
+		}
+		weChatCallBack = currentPageWeChatCallBack;
 	}
 
 	/**
@@ -340,6 +377,7 @@ public class EuexWeChat extends EUExBase {
 		SendAuth.Req req = new SendAuth.Req();
 		req.scope = parms[0];// "snsapi_userinfo"
 		req.state = parms[1];// "wechat_sdk_demo_test"
+		req.transaction = registerNewUUIDTransactionOfWeChatCallback("weiXinLogin");
 		Log.d(TAG, req.scope + "=======>" + req.state + "======appId====>"
 				+ appId);
 		api.sendReq(req);
@@ -622,7 +660,7 @@ public class EuexWeChat extends EUExBase {
 		SendMessageToWX.Req req = new SendMessageToWX.Req();
 		req.message = msg;
 		req.scene = scene;
-		req.transaction = "text";
+		req.transaction = registerNewUUIDTransactionOfWeChatCallback("sendTextContent");
 		Log.i(TAG, scene + " " + text);
 		return api.sendReq(req);
 
@@ -673,9 +711,9 @@ public class EuexWeChat extends EUExBase {
 		}
 
 		SendMessageToWX.Req req = new SendMessageToWX.Req();
-		req.transaction = buildTransaction("img");
 		req.message = msg;
 		req.scene = scene;
+		req.transaction = registerNewUUIDTransactionOfWeChatCallback("sendImageContent");
 		Log.i(TAG, scene + " " + realImgPath);
 		return api.sendReq(req);
 	}
@@ -1022,6 +1060,7 @@ public class EuexWeChat extends EUExBase {
 
     public void sendPay(String[] params) {
         PayReq req = new PayReq();
+		req.transaction = registerNewUUIDTransactionOfWeChatCallback("sendPay");
         req.appId = appId;
         req.partnerId = params[0];
         req.prepayId = params[1];
@@ -1045,6 +1084,7 @@ public class EuexWeChat extends EUExBase {
 
 	public void gotoPay(String[] params) {
 	    PayReq req = new PayReq();
+		req.transaction = registerNewUUIDTransactionOfWeChatCallback("gotoPay");
 		req.appId = Utils.getAppId(mContext);
 		req.partnerId = params[0];
 		req.prepayId = params[1];
@@ -1189,6 +1229,7 @@ public class EuexWeChat extends EUExBase {
 	 */
 	public void shareImage(final int scene, String thumbImgPath,
 			String realImgPath) {
+		final String transaction = registerNewUUIDTransactionOfWeChatCallback("shareImage");
 		if (realImgPath == null || realImgPath.length() == 0) {
 			return;
 		}
@@ -1218,19 +1259,21 @@ public class EuexWeChat extends EUExBase {
 						msg.mediaObject = imgObj;
 
 						SendMessageToWX.Req req = new SendMessageToWX.Req();
-						req.transaction = buildTransaction("img");
+						req.transaction = transaction;
 						req.message = msg;
 						req.scene = scene;
 						api.sendReq(req);
 					} catch (Exception e) {
 						e.printStackTrace();
 						// 图片解析失败，将错误返回
-						weChatCallBack.callBackShareResult(1);
+						EuexWeChat.WeChatCallBack callback = EuexWeChat.getAndRemoveWeChatCallbackWithUUIDTransaction(transaction);
+						callback.callBackShareResult(1);
 					}
 				}else{
             		// 图片解析失败，将错误返回
 					Log.e(TAG, "DecodeImageAsyncTask==onFeedback==>解析失败，shareImage无法分享");
-					weChatCallBack.callBackShareResult(1);
+					EuexWeChat.WeChatCallBack callback = EuexWeChat.getAndRemoveWeChatCallbackWithUUIDTransaction(transaction);
+					callback.callBackShareResult(1);
 				}
             }
         }).execute(thumbPath);
@@ -1382,7 +1425,7 @@ public class EuexWeChat extends EUExBase {
         }
 
         SendMessageToWX.Req req = new SendMessageToWX.Req();
-        req.transaction = buildTransaction("music");
+		req.transaction = registerNewUUIDTransactionOfWeChatCallback("shareMusic");
         req.message = msg;
         req.scene = vo.getScene();
         api.sendReq(req);
@@ -1418,7 +1461,7 @@ public class EuexWeChat extends EUExBase {
         }
 
         SendMessageToWX.Req req = new SendMessageToWX.Req();
-        req.transaction = buildTransaction("video");
+		req.transaction = registerNewUUIDTransactionOfWeChatCallback("shareVideo");
         req.message = msg;
         req.scene = vo.getScene();
         api.sendReq(req);
@@ -1439,8 +1482,10 @@ public class EuexWeChat extends EUExBase {
 	 */
 	public void shareLink(final int scene, final String thumbImgPath,
 			final String title, final String description, final String wedpageUrl) {
+		final String transaction = registerNewUUIDTransactionOfWeChatCallback("shareLink");
 		if (wedpageUrl == null || wedpageUrl.length() == 0 || api == null) {
-			weChatCallBack.callBackShareResult(1);
+			EuexWeChat.WeChatCallBack callback = EuexWeChat.getAndRemoveWeChatCallbackWithUUIDTransaction(transaction);
+			callback.callBackShareResult(1);
 			return;
 		}
 
@@ -1462,7 +1507,7 @@ public class EuexWeChat extends EUExBase {
 					msg.mediaObject = webObj;
 
 					SendMessageToWX.Req req = new SendMessageToWX.Req();
-					req.transaction = buildTransaction("link");
+					req.transaction = transaction;
 					req.message = msg;
 					req.scene = scene;
 					api.sendReq(req);
@@ -1664,6 +1709,7 @@ public class EuexWeChat extends EUExBase {
 			req.signType = "SHA1"; // 微信文档写的是目前仅支持SHA1
 			String cardSign = Utils.sha1(paramList);
 			req.cardSign = cardSign;
+			req.transaction = registerNewUUIDTransactionOfWeChatCallback("openChooseInvoice");
 			api.sendReq(req);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1700,6 +1746,7 @@ public class EuexWeChat extends EUExBase {
 			SendAuth.Req req = new SendAuth.Req();
 			req.scope = dataVO.getScope();// "snsapi_userinfo"
 			req.state = dataVO.getState();// "wechat_sdk_demo_test"
+			req.transaction = registerNewUUIDTransactionOfWeChatCallback("login");
 			Log.d(TAG, req.scope + "=======>" + req.state + "======appId====>" + appId);
 			api.sendReq(req);
 		} catch (Exception e) {

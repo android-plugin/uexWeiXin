@@ -3,7 +3,6 @@ package net.sourceforge.simcpux.wxapi;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.tencent.mm.opensdk.constants.ConstantsAPI;
 import com.tencent.mm.opensdk.modelbase.BaseReq;
@@ -16,11 +15,13 @@ import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
+import org.zywx.wbpalmstar.base.BDebug;
 import org.zywx.wbpalmstar.plugin.uexweixin.EuexWeChat;
 import org.zywx.wbpalmstar.plugin.uexweixin.Utils;
 
 public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
+	private static final String TAG = "WXEntryActivity";
 	private IWXAPI api;
 
 	@Override
@@ -48,6 +49,10 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
 	@Override
 	public void onReq(BaseReq req) {
+		String transaction = req.transaction;
+		BDebug.i(EuexWeChat.TAG, TAG + "-onReq req.getType():", req.getType() + "----------");
+		BDebug.i(EuexWeChat.TAG, TAG + "-onReq openId = " + req.openId);
+		BDebug.i(EuexWeChat.TAG,TAG + "-onReq transaction = " + transaction);
 		switch (req.getType()) {
 		case ConstantsAPI.COMMAND_GETMESSAGE_FROM_WX:
 			break;
@@ -68,7 +73,11 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 	@Override
 	public void onResp(final BaseResp resp) {
 		int statusCode = 0;
-		Log.i(EuexWeChat.TAG + "-onResp:", resp.getType() + "----------");
+		String transaction = resp.transaction;
+		BDebug.i(EuexWeChat.TAG, TAG + "-onResp resp.errCode:", resp.errCode + "----------");
+		BDebug.i(EuexWeChat.TAG, TAG + "-onResp resp.getType():", resp.getType() + "----------");
+		BDebug.i(EuexWeChat.TAG, TAG + "-onResp openId = " + resp.openId);
+		BDebug.i(EuexWeChat.TAG,TAG + "-onResp transaction = " + transaction);
 		switch (resp.errCode) {
 		case BaseResp.ErrCode.ERR_AUTH_DENIED:
 			statusCode = -4;
@@ -91,28 +100,29 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 		default:
 			break;
 		}
+		EuexWeChat.WeChatCallBack callback = EuexWeChat.getAndRemoveWeChatCallbackWithUUIDTransaction(transaction);
         if (resp instanceof SendMessageToWX.Resp){
-            if (EuexWeChat.weChatCallBack != null) {
-                EuexWeChat.weChatCallBack.callBackShareResult(statusCode);
+            if (callback != null) {
+				callback.callBackShareResult(statusCode);
             }
         }
 
         if (resp instanceof SendAuth.Resp){
-            if (EuexWeChat.weChatCallBack != null) {
-                EuexWeChat.weChatCallBack.backLoginResult(resp);
+            if (callback != null) {
+				callback.backLoginResult(resp);
             }
         }
 
 		if (resp.getType() == ConstantsAPI.COMMAND_LAUNCH_WX_MINIPROGRAM
 				&& resp instanceof WXLaunchMiniProgram.Resp) {
-			if (EuexWeChat.weChatCallBack != null){
-				EuexWeChat.weChatCallBack.callbackMiniProgram(resp);
+			if (callback != null){
+				callback.callbackMiniProgram(resp);
 			}
 		}
 
 		if (resp.getType() == ConstantsAPI.COMMAND_CHOOSE_CARD_FROM_EX_CARD_PACKAGE && resp instanceof ChooseCardFromWXCardPackage.Resp) {
-			if (EuexWeChat.weChatCallBack != null){
-				EuexWeChat.weChatCallBack.callbackChooseCard(resp);
+			if (callback != null){
+				callback.callbackChooseCard(resp);
 			}
 		}
 
