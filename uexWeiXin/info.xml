@@ -1,9 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexWeiXin" version="4.3.12" build="2020110501">
-        <info>=12:全面修复微信操作接口执行后的回调无法回调给当前页面的问题</info>
-        <build>=11:修复打开微信选择发票选择后无法返回App的问题</build>
-        <build>=10:增加打开微信小程序功能以及打开微信选择发票的功能</build>
+    <plugin uexName="uexWeiXin" version="4.3.13" build="2020110601">
+        <info>13:修复跳转选择微信发票无法多选的问题</info>
+        <build>12:全面修复微信操作接口执行后的回调无法回调给当前页面的问题</build>
+        <build>11:修复打开微信选择发票选择后无法返回App的问题</build>
+        <build>10:增加打开微信小程序功能以及打开微信选择发票的功能</build>
         <build>9:升级微信SDK版本至6.6.4，并修复和优化了若干内部逻辑，增强稳定性</build>
         <build>8:微信图片分享，缩率图不存在导致崩溃的问题</build>
         <build>7:安全检测,修改请求方式增加https验证</build>
