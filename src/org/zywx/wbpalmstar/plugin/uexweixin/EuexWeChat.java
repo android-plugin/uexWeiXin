@@ -1709,6 +1709,7 @@ public class EuexWeChat extends EUExBase {
 			req.signType = "SHA1"; // 微信文档写的是目前仅支持SHA1
 			String cardSign = Utils.sha1(paramList);
 			req.cardSign = cardSign;
+			req.canMultiSelect = "1"; // 支持多选。具体没有查到官方文档，猜测写了1，生效了。
 			req.transaction = registerNewUUIDTransactionOfWeChatCallback("openChooseInvoice");
 			api.sendReq(req);
 		} catch (Exception e) {
