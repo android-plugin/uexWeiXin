@@ -159,6 +159,17 @@
         });
     }
 
+    function openChooseInvoiceForDetail(){
+        // 这里的测试case中url是一个示例
+        // 请求的Content-Type为application/x-www-form-urlencoded
+        // 请求数据：key为model，value为微信发票返回的cardArr数据（并且value需要将json转换为json字符串，然后进行urlEncode处理后传输）
+        // 故，服务端接口需要按照如上数据格式，开发自己的服务接口，用于获取发票详情
+        uexWeiXin.openChooseInvoice({handleUrl:"https://a.b.c/getInvoiceBatch"}, function(data){
+            console.log("openChooseInvoiceForDetail: " + JSON.stringify(data));
+            alert("openChooseInvoiceForDetail: " + JSON.stringify(data))
+        });
+    }
+
 </script>
 </head>
 
@@ -216,6 +227,8 @@
         <span>7.打开微信发票</span>
 
         <input class="btn" type="button" value="打开微信发票" onclick="openChooseInvoice()">
+
+        <input class="btn" type="button" value="打开微信发票并直接获取详情" onclick="openChooseInvoiceForDetail()">
 
     </div>
 </div>
