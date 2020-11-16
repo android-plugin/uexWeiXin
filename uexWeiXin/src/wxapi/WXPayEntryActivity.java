@@ -15,6 +15,7 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import org.zywx.wbpalmstar.base.BDebug;
 import org.zywx.wbpalmstar.plugin.uexweixin.EuexWeChat;
 import org.zywx.wbpalmstar.plugin.uexweixin.Utils;
+import org.zywx.wbpalmstar.plugin.uexweixin.WeChatCallBack;
 
 public class WXPayEntryActivity extends Activity implements IWXAPIEventHandler {
 
@@ -53,7 +54,7 @@ public class WXPayEntryActivity extends Activity implements IWXAPIEventHandler {
 		BDebug.i(EuexWeChat.TAG, TAG + "-onResp resp.getType():", resp.getType() + "----------");
 		BDebug.i(EuexWeChat.TAG, TAG + "-onResp openId = " + resp.openId);
 		BDebug.i(EuexWeChat.TAG,TAG + "-onResp transaction = " + transaction);
-		EuexWeChat.WeChatCallBack callback = EuexWeChat.getAndRemoveWeChatCallbackWithUUIDTransaction(transaction);
+		WeChatCallBack callback = EuexWeChat.getAndRemoveWeChatCallbackWithUUIDTransaction(transaction).getCallback();
 		if (resp.getType() == ConstantsAPI.COMMAND_PAY_BY_WX) {
 			if (callback != null) {
 				Log.d("resp", ConstantsAPI.COMMAND_PAY_BY_WX + "");

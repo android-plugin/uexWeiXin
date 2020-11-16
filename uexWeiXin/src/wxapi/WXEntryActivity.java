@@ -18,6 +18,8 @@ import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 import org.zywx.wbpalmstar.base.BDebug;
 import org.zywx.wbpalmstar.plugin.uexweixin.EuexWeChat;
 import org.zywx.wbpalmstar.plugin.uexweixin.Utils;
+import org.zywx.wbpalmstar.plugin.uexweixin.VO.WeChatCallBackParamsVO;
+import org.zywx.wbpalmstar.plugin.uexweixin.WeChatCallBack;
 
 public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
@@ -100,7 +102,8 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 		default:
 			break;
 		}
-		EuexWeChat.WeChatCallBack callback = EuexWeChat.getAndRemoveWeChatCallbackWithUUIDTransaction(transaction);
+		WeChatCallBackParamsVO callBackParamsVO = EuexWeChat.getAndRemoveWeChatCallbackWithUUIDTransaction(transaction);
+		WeChatCallBack callback = callBackParamsVO.getCallback();
         if (resp instanceof SendMessageToWX.Resp){
             if (callback != null) {
 				callback.callBackShareResult(statusCode);
@@ -122,7 +125,7 @@ public class WXEntryActivity extends Activity implements IWXAPIEventHandler {
 
 		if (resp.getType() == ConstantsAPI.COMMAND_CHOOSE_CARD_FROM_EX_CARD_PACKAGE && resp instanceof ChooseCardFromWXCardPackage.Resp) {
 			if (callback != null){
-				callback.callbackChooseCard(resp);
+				callback.callbackChooseCard(callBackParamsVO.getParams(), resp);
 			}
 		}
 

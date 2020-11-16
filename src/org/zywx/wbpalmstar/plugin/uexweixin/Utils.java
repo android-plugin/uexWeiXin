@@ -10,6 +10,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import org.apache.commons.io.IOUtils;
+import org.zywx.wbpalmstar.base.BDebug;
 import org.zywx.wbpalmstar.platform.certificates.Http;
 
 import java.io.ByteArrayOutputStream;
@@ -20,6 +21,7 @@ import java.net.HttpURLConnection;
 import java.security.MessageDigest;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 public class Utils {
@@ -79,33 +81,88 @@ public class Utils {
 		OutputStream out = null; //写
 		HttpURLConnection httpURLConnection;
 		try {
-			httpURLConnection=Http.getHttpsURLConnection(url);
+			httpURLConnection = Http.getHttpsURLConnection(url);
 			httpURLConnection.setRequestMethod("POST");
 			httpURLConnection.setRequestProperty("Accept", "application/json");
 			httpURLConnection.setRequestProperty("Content-type", "application/json");
 			httpURLConnection.setUseCaches(false);
 			httpURLConnection.setDoOutput(true);
 			httpURLConnection.setDoInput(true);
-			httpURLConnection.setConnectTimeout(30000); //30秒连接超时
-			httpURLConnection.setReadTimeout(30000);    //30秒读取超时
-			//传入参数
+			httpURLConnection.setConnectTimeout(30000);
+			httpURLConnection.setReadTimeout(30000);
 			out = httpURLConnection.getOutputStream();
 			out.write(entity.getBytes());
-			out.flush(); //清空缓冲区,发送数据
+			out.flush();
 			out.close();
 			httpURLConnection.connect();
 			int responseCode = httpURLConnection.getResponseCode();
 			if (responseCode != OK) {
-				Log.e(TAG, "httpURLConnection fail, status code = " + responseCode);
+				BDebug.w(TAG, "httpURLConnection fail, status code = " + responseCode);
 				return null;
 			}
 			return toByteArray(httpURLConnection);
 		} catch (Exception e) {
-			Log.e(TAG, "httpURLConnection exception, e = " + e.getMessage());
+			BDebug.w(TAG, "httpURLConnection exception, e = " + e.getMessage());
 			e.printStackTrace();
 			return null;
 		}
 	}
+
+	public static byte[] httpPostForm(String url, Map<String, String> formParams) {
+		if (url == null || url.length() == 0) {
+			Log.e(TAG, "httpPostForm, url is null");
+			return null;
+		}
+		OutputStream out = null; //写
+		HttpURLConnection httpURLConnection;
+		try {
+			httpURLConnection = Http.getHttpsURLConnection(url);
+			httpURLConnection.setRequestMethod("POST");
+			httpURLConnection.setRequestProperty("Accept", "application/json");
+			httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+			httpURLConnection.setUseCaches(false);
+			httpURLConnection.setDoOutput(true);
+			httpURLConnection.setDoInput(true);
+			httpURLConnection.setConnectTimeout(30000);
+			httpURLConnection.setReadTimeout(30000);
+			out = httpURLConnection.getOutputStream();
+			String entity = mapToFormString(formParams);
+			out.write(entity.getBytes());
+			out.flush();
+			out.close();
+			httpURLConnection.connect();
+			int responseCode = httpURLConnection.getResponseCode();
+			if (responseCode != OK) {
+				BDebug.w(TAG, "httpURLConnection fail, status code = " + responseCode);
+				return null;
+			}
+			return toByteArray(httpURLConnection);
+		} catch (Exception e) {
+			BDebug.w(TAG, "httpURLConnection exception, e = " + e.getMessage());
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	private static String mapToFormString(Map<String, String> formParams){
+		String result = "";
+		if (formParams == null){
+			return result;
+		}
+		StringBuilder strb = new StringBuilder();
+		for (String key : formParams.keySet()){
+			String value = formParams.get(key);
+			strb.append(key);
+			strb.append("=");
+			strb.append(value);
+			strb.append("&");
+		}
+		if (strb.length() > 0){
+			result = strb.substring(0, strb.length() - 1);
+		}
+		return result;
+	}
+
 	public static byte[] streamToByteArray(InputStream in) {
 		if (in == null) {
 			return null;
