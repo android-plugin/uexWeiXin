@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <uexplugins>
-    <plugin uexName="uexWeiXin" version="4.3.14" build="2020111601">
-        <info>14:增加微信发票选择结果返回后，可以向自定义服务端接口请求发票详情信息一并返回。需要服务端开发对应的接口支持</info>
+    <plugin uexName="uexWeiXin" version="4.3.14.1" build="2020111602">
+        <info>14.1:增加微信发票选择结果返回后，可以向自定义服务端接口请求发票详情信息一并返回。需要服务端开发对应的接口支持</info>
         <build>13:修复跳转选择微信发票无法多选的问题</build>
         <build>12:全面修复微信操作接口执行后的回调无法回调给当前页面的问题</build>
         <build>11:修复打开微信选择发票选择后无法返回App的问题</build>
