@@ -50,11 +50,9 @@ public class WXChooseInvoiceDetailTask extends AsyncTask<Void, Void, String>{
         String resultContent = null;
         try {
             String url = this.handleUrl;
-            String cardArrStr = URLEncoder.encode(this.cardArrParam.toString(), "UTF-8");
-            Map<String, String> paramsMap = new HashMap<>();
-            paramsMap.put("model", cardArrStr);
-            BDebug.i(TAG, "requestParams model: " + cardArrStr);
-            byte[] resultBuffer = Utils.httpPostForm(url, paramsMap);
+            String cardArrStr = this.cardArrParam.toString();
+            BDebug.i(TAG, "requestParams cardArrStr: " + cardArrStr);
+            byte[] resultBuffer = Utils.httpPost(url, cardArrStr);
             resultContent = new String(resultBuffer);
             BDebug.i(TAG, resultContent);
         } catch (Exception e) {

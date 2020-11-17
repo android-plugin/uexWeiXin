@@ -126,7 +126,14 @@ public class EuexWeChat extends EUExBase {
 	 * value即为WeChatCallBack对象。
 	 */
 	private static Map<String, WeChatCallBackParamsVO> weChatCallBackMap = new HashMap<>();
+	/**
+	 * 微信注册的appId
+	 */
 	private static String appId;
+	/**
+	 * 用于处理微信数据的业务服务接口的基础地址
+	 */
+	private static String customBaseUrl;
 	private long timeStamp;
 	private String nonceStr;
 
@@ -353,8 +360,9 @@ public class EuexWeChat extends EUExBase {
 							callbackToJs(Integer.parseInt(openChooseInvoiceFuncId), false, obj);
 						}else{
 							// 如果传入了handleUrl，则handleUrl为按照标准开发的自定义服务接口，可以用于批量查询发票详情，这时需要请求接口并获取发票详情列表
+							String requestUrl = customBaseUrl + handleUrl;
 							new WXChooseInvoiceDetailTask(mContext, appId,
-									handleUrl, cardArrayJson,
+									requestUrl, cardArrayJson,
 									new WXChooseInvoiceDetailTask.OnResultListener() {
 										@Override
 										public void onResult(String jsonData) {
@@ -362,7 +370,7 @@ public class EuexWeChat extends EUExBase {
 												JSONObject json = new JSONObject(jsonData);
 												// 数据正常则按照json对象返回
 												callbackToJs(Integer.parseInt(openChooseInvoiceFuncId), false, json);
-											} catch (JSONException e) {
+											} catch (Exception e) {
 												e.printStackTrace();
 												// 数据异常则返回字符串
 												callbackToJs(Integer.parseInt(openChooseInvoiceFuncId), false, jsonData);
@@ -394,8 +402,17 @@ public class EuexWeChat extends EUExBase {
 		}
 		appId = data[0];
 		if (data.length >= 2){
-			// iOS使用的参数， Android暂时无用
+			// 参数2为iOS使用的参数， Android暂时无用
 			String universalLink = data[1];
+			if (data.length >= 3){
+				// 参数3为业务服务器的基础地址
+				try {
+					JSONObject paramJson = new JSONObject(data[2]);
+					customBaseUrl = paramJson.getString("baseUrl");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		if (appId == null || appId.length() == 0) {
 			return EUExCallback.F_C_FAILED;
