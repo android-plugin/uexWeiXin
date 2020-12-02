@@ -46,12 +46,13 @@ import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginCheckTokenVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginRefreshTokenVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginResultVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.LoginVO;
-import org.zywx.wbpalmstar.plugin.uexweixin.VO.OpenChooseInvoiceVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.OpenMiniProgramVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.PayDataVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.PrePayDataVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.ShareMusicVO;
 import org.zywx.wbpalmstar.plugin.uexweixin.VO.ShareVideoVO;
+import org.zywx.wbpalmstar.plugin.uexweixin.VO.WeChatCallBackParamsVO;
+import org.zywx.wbpalmstar.plugin.uexweixin.network.WXChooseInvoiceDetailTask;
 import org.zywx.wbpalmstar.plugin.uexweixin.utils.IFeedback;
 import org.zywx.wbpalmstar.plugin.uexweixin.utils.JsConst;
 import org.zywx.wbpalmstar.plugin.uexweixin.utils.WXPayGetPrepayIdTask;
@@ -61,9 +62,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 @SuppressLint("SdCardPath")
 public class EuexWeChat extends EUExBase {
@@ -108,8 +112,28 @@ public class EuexWeChat extends EUExBase {
     private static final int SHARE_VIDEO_CONTENT_CODE = 6;
     private static final int SHARE_MUSIC_CONTENT_CODE = 7;
 	private static IWXAPI api;
+	/**
+	 * root页面的回调对象
+	 */
 	public static WeChatCallBack weChatCallBack;
+	/**
+	 * 当前页面的微信回调
+	 */
+	private WeChatCallBack currentPageWeChatCallBack;
+	/**
+	 * 用于保存所有正在进行等待接收回调的操作所对应的callback对象。
+	 * key为随机生成的的UUID，会被放入微信SDK的请求实体的transaction属性中，而在微信SDK的响应实体中的transaction属性会与之一一对应，从而实现一一对应的回调。
+	 * value即为WeChatCallBack对象。
+	 */
+	private static Map<String, WeChatCallBackParamsVO> weChatCallBackMap = new HashMap<>();
+	/**
+	 * 微信注册的appId
+	 */
 	private static String appId;
+	/**
+	 * 用于处理微信数据的业务服务接口的基础地址
+	 */
+	private static String customBaseUrl;
 	private long timeStamp;
 	private String nonceStr;
 
@@ -146,8 +170,31 @@ public class EuexWeChat extends EUExBase {
     private String startPayFuncId;
     private String getAccessTokenFunId;
     private String getAccessTokenLocalFunId;
-    private String openChooseInvoiceFuncId;
 
+	/**
+	 * 详见weChatCallBackMap属性的注释。
+	 */
+    private String registerNewUUIDTransactionOfWeChatCallback(String tag, String[] params){
+    	String transactionId = tag + "-" + UUID.randomUUID().toString();
+    	WeChatCallBackParamsVO callBackParamsVO = new WeChatCallBackParamsVO(params, currentPageWeChatCallBack);
+    	weChatCallBackMap.put(transactionId, callBackParamsVO);
+    	return transactionId;
+	}
+
+	/**
+	 * 详见weChatCallBackMap属性的注释。
+	 */
+	public static WeChatCallBackParamsVO getAndRemoveWeChatCallbackWithUUIDTransaction(String transactionId){
+		WeChatCallBackParamsVO callBackParamsVO = weChatCallBackMap.get(transactionId);
+		weChatCallBackMap.remove(transactionId);
+		if (callBackParamsVO == null){
+			callBackParamsVO = new WeChatCallBackParamsVO(null, null);
+		}
+		if (callBackParamsVO.getCallback() == null){
+			callBackParamsVO.setCallback(weChatCallBack);
+		}
+		return callBackParamsVO;
+	}
 
 	public EuexWeChat(Context context, EBrowserView parent) {
 		super(context, parent);
@@ -174,10 +221,7 @@ public class EuexWeChat extends EUExBase {
 	}
 
 	private void init() {
-		if(weChatCallBack != null) {
-		    return;
-		}
-		weChatCallBack = new WeChatCallBack() {
+		currentPageWeChatCallBack = new WeChatCallBack() {
 			@Override
 			public void callBackPayResult(BaseResp msg) {
                 callbackOldInterface(CB_GET_PAY_RESULT, 0, EUExCallback.F_C_JSON,
@@ -282,26 +326,69 @@ public class EuexWeChat extends EUExBase {
 			}
 
 			@Override
-			public void callbackChooseCard(BaseResp msg) {
+			public void callbackChooseCard(String[] params, BaseResp msg) {
+				String paramsJson = params[0];
+				final String openChooseInvoiceFuncId = params[1];
+				if (msg == null){
+					JSONObject obj = new JSONObject();
+					try {
+						obj.put("errCode", "AppCan");
+						obj.put("errStr", "参数解析错误");
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+					callbackToJs(Integer.parseInt(openChooseInvoiceFuncId), false, obj);
+					return;
+				}
 				ChooseCardFromWXCardPackage.Resp chooseCardFromWXCardPackage = (ChooseCardFromWXCardPackage.Resp) msg;
 				if(null != openChooseInvoiceFuncId) {
 					try {
 						JSONObject obj = new JSONObject();
 						obj.put("errCode", msg.errCode);
 						obj.put("errStr", msg.errStr);
+						JSONArray cardArrayJson = new JSONArray();
 						try {
-							JSONArray cardArrayJson = new JSONArray(chooseCardFromWXCardPackage.cardItemList);
+							cardArrayJson = new JSONArray(chooseCardFromWXCardPackage.cardItemList);
 							obj.put("cardAry", cardArrayJson);
 						} catch (JSONException e) {
 							e.printStackTrace();
 						}
-						callbackToJs(Integer.parseInt(openChooseInvoiceFuncId), false, obj);
+						JSONObject inJson = new JSONObject(paramsJson);
+						String handleUrl = inJson.optString("handleUrl", "");
+						if (TextUtils.isEmpty(handleUrl)){
+							// 如果没有传入handleUrl，则默认是直接回调发票ID的列表，不自动查询详情。
+							callbackToJs(Integer.parseInt(openChooseInvoiceFuncId), false, obj);
+						}else{
+							// 如果传入了handleUrl，则handleUrl为按照标准开发的自定义服务接口，可以用于批量查询发票详情，这时需要请求接口并获取发票详情列表
+							String requestUrl = customBaseUrl + handleUrl;
+							new WXChooseInvoiceDetailTask(mContext, appId,
+									requestUrl, cardArrayJson,
+									new WXChooseInvoiceDetailTask.OnResultListener() {
+										@Override
+										public void onResult(String jsonData) {
+											try {
+												JSONObject json = new JSONObject(jsonData);
+												// 数据正常则按照json对象返回
+												callbackToJs(Integer.parseInt(openChooseInvoiceFuncId), false, json);
+											} catch (Exception e) {
+												e.printStackTrace();
+												// 数据异常则返回字符串
+												callbackToJs(Integer.parseInt(openChooseInvoiceFuncId), false, jsonData);
+											}
+										}
+									}).execute();
+						}
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
 			}
 		};
+		// 兼容延续之前的老逻辑，继续保存root页面的回调对象
+		if(weChatCallBack != null) {
+			return;
+		}
+		weChatCallBack = currentPageWeChatCallBack;
 	}
 
 	/**
@@ -315,8 +402,17 @@ public class EuexWeChat extends EUExBase {
 		}
 		appId = data[0];
 		if (data.length >= 2){
-			// iOS使用的参数， Android暂时无用
+			// 参数2为iOS使用的参数， Android暂时无用
 			String universalLink = data[1];
+			if (data.length >= 3){
+				// 参数3为业务服务器的基础地址
+				try {
+					JSONObject paramJson = new JSONObject(data[2]);
+					customBaseUrl = paramJson.getString("baseUrl");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		if (appId == null || appId.length() == 0) {
 			return EUExCallback.F_C_FAILED;
@@ -340,6 +436,7 @@ public class EuexWeChat extends EUExBase {
 		SendAuth.Req req = new SendAuth.Req();
 		req.scope = parms[0];// "snsapi_userinfo"
 		req.state = parms[1];// "wechat_sdk_demo_test"
+		req.transaction = registerNewUUIDTransactionOfWeChatCallback("weiXinLogin", parms);
 		Log.d(TAG, req.scope + "=======>" + req.state + "======appId====>"
 				+ appId);
 		api.sendReq(req);
@@ -622,7 +719,7 @@ public class EuexWeChat extends EUExBase {
 		SendMessageToWX.Req req = new SendMessageToWX.Req();
 		req.message = msg;
 		req.scene = scene;
-		req.transaction = "text";
+		req.transaction = registerNewUUIDTransactionOfWeChatCallback("sendTextContent", null);// TODO 此处后续应当将参数补充
 		Log.i(TAG, scene + " " + text);
 		return api.sendReq(req);
 
@@ -673,9 +770,9 @@ public class EuexWeChat extends EUExBase {
 		}
 
 		SendMessageToWX.Req req = new SendMessageToWX.Req();
-		req.transaction = buildTransaction("img");
 		req.message = msg;
 		req.scene = scene;
+		req.transaction = registerNewUUIDTransactionOfWeChatCallback("sendImageContent", null);// TODO 此处后续应当将参数补充完成
 		Log.i(TAG, scene + " " + realImgPath);
 		return api.sendReq(req);
 	}
@@ -1022,6 +1119,7 @@ public class EuexWeChat extends EUExBase {
 
     public void sendPay(String[] params) {
         PayReq req = new PayReq();
+		req.transaction = registerNewUUIDTransactionOfWeChatCallback("sendPay", params);
         req.appId = appId;
         req.partnerId = params[0];
         req.prepayId = params[1];
@@ -1045,6 +1143,7 @@ public class EuexWeChat extends EUExBase {
 
 	public void gotoPay(String[] params) {
 	    PayReq req = new PayReq();
+		req.transaction = registerNewUUIDTransactionOfWeChatCallback("gotoPay", params);
 		req.appId = Utils.getAppId(mContext);
 		req.partnerId = params[0];
 		req.prepayId = params[1];
@@ -1125,19 +1224,6 @@ public class EuexWeChat extends EUExBase {
 		return false;
 	}
 
-	public interface WeChatCallBack {
-		void callBackPayResult(BaseResp msg);
-
-		void callBackShareResult(int message);
-
-		void backLoginResult(BaseResp msg);
-
-		void callbackMiniProgram(BaseResp msg);
-
-		void callbackChooseCard(BaseResp msg);
-
-	}
-
 	public boolean shareTextContent(String[] params) {
 		code = SHARE_TEXT_CONTENT_CODE;
         if (params.length == 2) {
@@ -1189,6 +1275,7 @@ public class EuexWeChat extends EUExBase {
 	 */
 	public void shareImage(final int scene, String thumbImgPath,
 			String realImgPath) {
+		final String transaction = registerNewUUIDTransactionOfWeChatCallback("shareImage", null);// TODO 后续需要补全此处的参数
 		if (realImgPath == null || realImgPath.length() == 0) {
 			return;
 		}
@@ -1218,19 +1305,21 @@ public class EuexWeChat extends EUExBase {
 						msg.mediaObject = imgObj;
 
 						SendMessageToWX.Req req = new SendMessageToWX.Req();
-						req.transaction = buildTransaction("img");
+						req.transaction = transaction;
 						req.message = msg;
 						req.scene = scene;
 						api.sendReq(req);
 					} catch (Exception e) {
 						e.printStackTrace();
 						// 图片解析失败，将错误返回
-						weChatCallBack.callBackShareResult(1);
+						WeChatCallBack callback = EuexWeChat.getAndRemoveWeChatCallbackWithUUIDTransaction(transaction).getCallback();
+						callback.callBackShareResult(1);
 					}
 				}else{
             		// 图片解析失败，将错误返回
 					Log.e(TAG, "DecodeImageAsyncTask==onFeedback==>解析失败，shareImage无法分享");
-					weChatCallBack.callBackShareResult(1);
+					WeChatCallBack callback = EuexWeChat.getAndRemoveWeChatCallbackWithUUIDTransaction(transaction).getCallback();
+					callback.callBackShareResult(1);
 				}
             }
         }).execute(thumbPath);
@@ -1382,7 +1471,7 @@ public class EuexWeChat extends EUExBase {
         }
 
         SendMessageToWX.Req req = new SendMessageToWX.Req();
-        req.transaction = buildTransaction("music");
+		req.transaction = registerNewUUIDTransactionOfWeChatCallback("shareMusic", null);// TODO 后续需要补全此处的参数
         req.message = msg;
         req.scene = vo.getScene();
         api.sendReq(req);
@@ -1418,7 +1507,7 @@ public class EuexWeChat extends EUExBase {
         }
 
         SendMessageToWX.Req req = new SendMessageToWX.Req();
-        req.transaction = buildTransaction("video");
+		req.transaction = registerNewUUIDTransactionOfWeChatCallback("shareVideo", null);// TODO 后续需要补全此处的参数
         req.message = msg;
         req.scene = vo.getScene();
         api.sendReq(req);
@@ -1439,8 +1528,10 @@ public class EuexWeChat extends EUExBase {
 	 */
 	public void shareLink(final int scene, final String thumbImgPath,
 			final String title, final String description, final String wedpageUrl) {
+		final String transaction = registerNewUUIDTransactionOfWeChatCallback("shareLink", null);// TODO 后续需要补全此处的参数
 		if (wedpageUrl == null || wedpageUrl.length() == 0 || api == null) {
-			weChatCallBack.callBackShareResult(1);
+			WeChatCallBack callback = EuexWeChat.getAndRemoveWeChatCallbackWithUUIDTransaction(transaction).getCallback();
+			callback.callBackShareResult(1);
 			return;
 		}
 
@@ -1462,7 +1553,7 @@ public class EuexWeChat extends EUExBase {
 					msg.mediaObject = webObj;
 
 					SendMessageToWX.Req req = new SendMessageToWX.Req();
-					req.transaction = buildTransaction("link");
+					req.transaction = transaction;
 					req.message = msg;
 					req.scene = scene;
 					api.sendReq(req);
@@ -1645,9 +1736,9 @@ public class EuexWeChat extends EUExBase {
 			return;
 		}
 		if (params.length >= 2){
-			openChooseInvoiceFuncId = params[1];
+			// 整体参数已经一一保存在请求中，此处暂时无需使用
 		}
-		String json = params[0];
+		String json = params[0]; // 参数在此处没有使用，使用的位置位于发票选择结果返回的回调中。
 		try {
 			List<String> paramList = new ArrayList<>();
 			ChooseCardFromWXCardPackage.Req req = new ChooseCardFromWXCardPackage.Req();
@@ -1664,9 +1755,12 @@ public class EuexWeChat extends EUExBase {
 			req.signType = "SHA1"; // 微信文档写的是目前仅支持SHA1
 			String cardSign = Utils.sha1(paramList);
 			req.cardSign = cardSign;
+			req.canMultiSelect = "1"; // 支持多选。具体没有查到官方文档，猜测写了1，生效了。
+			req.transaction = registerNewUUIDTransactionOfWeChatCallback("openChooseInvoice", params);
 			api.sendReq(req);
 		} catch (Exception e) {
 			e.printStackTrace();
+			currentPageWeChatCallBack.callbackChooseCard(params, null);
 		}
 	}
 
@@ -1700,6 +1794,7 @@ public class EuexWeChat extends EUExBase {
 			SendAuth.Req req = new SendAuth.Req();
 			req.scope = dataVO.getScope();// "snsapi_userinfo"
 			req.state = dataVO.getState();// "wechat_sdk_demo_test"
+			req.transaction = registerNewUUIDTransactionOfWeChatCallback("login", params);
 			Log.d(TAG, req.scope + "=======>" + req.state + "======appId====>" + appId);
 			api.sendReq(req);
 		} catch (Exception e) {

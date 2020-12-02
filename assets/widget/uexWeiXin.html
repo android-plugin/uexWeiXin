@@ -132,8 +132,11 @@
         var prepayid = JSON.parse(JsonStr).prepayid;
         uexWeiXin.sendPay(partnerId,prepayid,app_key,packageValue);
     }
-    function registerApp(){
-        alert(uexWeiXin.registerApp(appId));
+    function registerApp(baseUrl){
+        // 参数3为可选参数，当有自定义服务端接口需要自动处理发票等结果时，需要在此配置基础url
+        alert(uexWeiXin.registerApp(appId, "", {
+                baseUrl:baseUrl
+            }));
     }
     function openNewWin(){
         uexWindow.open('pay', '0', "index.html", '2', '', '', 4);
@@ -159,6 +162,17 @@
         });
     }
 
+    function openChooseInvoiceForDetail(){
+        // 这里的测试case中url是一个示例，它需要跟registerApp接口传入的baseUrl结合使用
+        // 请求的Content-Type为application/json
+        // 请求数据：微信发票返回的cardArr数据（JSON数组的字符串）
+        // 故，服务端接口需要按照如上数据格式，开发自己的服务接口，用于获取发票详情
+        uexWeiXin.openChooseInvoice({handleUrl:"/getInvoiceBatch"}, function(data){
+            console.log("openChooseInvoiceForDetail: " + JSON.stringify(data));
+            alert("openChooseInvoiceForDetail: " + JSON.stringify(data))
+        });
+    }
+
 </script>
 </head>
 
@@ -166,7 +180,7 @@
 <div class="conbor">
     <div class="consj">
         <span>1.注册app id</span>
-        <input class="btn" type="button" value="注册App" onclick="registerApp();">
+        <input class="btn" type="button" value="注册App" onclick="registerApp('https://a.b.c');">
         <span>2.检测是否安装微信</span>
         <input class="btn" type="button" value="检测" onclick="alert(uexWeiXin.isWXAppInstalled());">
         <span>3.获取微信itunes安装地址</span>
@@ -216,6 +230,8 @@
         <span>7.打开微信发票</span>
 
         <input class="btn" type="button" value="打开微信发票" onclick="openChooseInvoice()">
+
+        <input class="btn" type="button" value="打开微信发票并直接获取详情" onclick="openChooseInvoiceForDetail()">
 
     </div>
 </div>
